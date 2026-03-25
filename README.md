@@ -50,6 +50,7 @@ Block #2
 
 - `OWNER_ADDRESSES` — list of Ethereum addresses with owner-level permissions (currently empty; all owner-gated operations are rejected).
 - `SOCIAL_PROFILE` — owner's GitHub profile: `https://github.com/Kushmanmb`.
+- `FACEBOOK_PROFILE` — owner's Facebook profile: `https://www.facebook.com/Kushmanmb23/`.
 - `COINBASE_ID` — owner's Coinbase ID: `kushman.cb.id`.
 
 ## Immutability
