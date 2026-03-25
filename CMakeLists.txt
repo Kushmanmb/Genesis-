@@ -9,6 +9,7 @@ add_executable(genesis
     src/sha256.cpp
     src/Block.cpp
     src/Blockchain.cpp
+    src/Node.cpp
 )
 
 target_include_directories(genesis PRIVATE src)
@@ -23,6 +24,7 @@ add_executable(genesis_tests
     src/sha256.cpp
     src/Block.cpp
     src/Blockchain.cpp
+    src/Node.cpp
 )
 
 target_include_directories(genesis_tests PRIVATE src)

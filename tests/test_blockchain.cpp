@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "Block.h"
 #include "Blockchain.h"
+#include "Node.h"
 #include "Owners.h"
 
 // ---- Block tests -------------------------------------------------------
