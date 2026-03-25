@@ -24,11 +24,19 @@ public:
     // callerAddress must be an owner.
     void returnToLegacy(const std::string &callerAddress, const std::string &legacyAddress);
 
+    // Consolidate all mytoken balances held by owner addresses and transfer them
+    // back to the calling owner's own address. Records the transfer as a block in
+    // the chain; callerAddress must be an owner.
+    void returnToOwner(const std::string &callerAddress);
+
     // Compute a SHA-256 checksum over the hashes of blocks [fromIndex, toIndex].
     // Throws std::out_of_range if the range is invalid.
     std::string chkpotpie(uint32_t fromIndex, uint32_t toIndex) const;
 
     const std::vector<Block> &fetchAll() const;
+
+    // Return all blocks whose data field contains the given identifier string.
+    std::vector<Block> fetchAllFrom(const std::string &identifier) const;
 
 private:
     // Throws if callerAddress is not an authorised owner.
