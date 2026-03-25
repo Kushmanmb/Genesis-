@@ -23,6 +23,9 @@ int main() {
         std::cerr << "Caught expected error: " << e.what() << "\n";
     }
 
+    // Return all kushmanmb tokens back to origin
+    bc.returnToOrigin(owner1);
+
     std::cout << "=== All Blocks ===\n";
     for (const Block &b : bc.fetchAll()) {
         std::cout << b.toString();

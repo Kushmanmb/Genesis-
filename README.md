@@ -38,4 +38,6 @@ Block #2
 
 - `Blockchain()` — constructs a chain seeded with the genesis block.
 - `addBlock(data)` — appends a new block linked to the current chain tip.
+- `addBlock(data, callerAddress)` — appends a new block; throws if `callerAddress` is not an authorised owner.
+- `returnToOrigin(callerAddress)` — records a block transferring all owner tokens back to the origin address; `callerAddress` must be an authorised owner.
 - `fetchAll()` — returns a const reference to the full vector of blocks.
