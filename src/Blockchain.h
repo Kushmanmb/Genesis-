@@ -19,9 +19,16 @@ public:
     // Records the transfer as a block in the chain; callerAddress must be an owner.
     void returnToOrigin(const std::string &callerAddress);
 
+    // Compute a SHA-256 checksum over the hashes of blocks [fromIndex, toIndex].
+    // Throws std::out_of_range if the range is invalid.
+    std::string chkpotpie(uint32_t fromIndex, uint32_t toIndex) const;
+
     const std::vector<Block> &fetchAll() const;
 
 private:
+    // Throws if callerAddress is not an authorised owner.
+    void requireOwner(const std::string &callerAddress) const;
+
     // Internal helper — no ownership check; only callable from within the class.
     void addBlockInternal(const std::string &data);
 

@@ -1,4 +1,5 @@
 #include "Blockchain.h"
+#include "sha256.h"
 
 #include <sstream>
 #include <stdexcept>
@@ -10,21 +11,23 @@ Blockchain::Blockchain() {
     chain.push_back(Block::createGenesis());
 }
 
+void Blockchain::requireOwner(const std::string &callerAddress) const {
+    if (!isOwner(callerAddress)) {
+        throw std::runtime_error("Permission denied: caller is not authorised");
+    }
+}
+
 void Blockchain::addBlock(const std::string &data) {
     addBlockInternal(data);
 }
 
 void Blockchain::addBlock(const std::string &data, const std::string &callerAddress) {
-    if (!isOwner(callerAddress)) {
-        throw std::runtime_error("Permission denied: caller is not authorised");
-    }
+    requireOwner(callerAddress);
     addBlockInternal(data);
 }
 
 void Blockchain::returnToOrigin(const std::string &callerAddress) {
-    if (!isOwner(callerAddress)) {
-        throw std::runtime_error("Permission denied: caller is not authorised");
-    }
+    requireOwner(callerAddress);
 
     std::ostringstream oss;
     oss << "Return tokens to origin (" << ORIGIN_ADDRESS << "):";
@@ -32,6 +35,20 @@ void Blockchain::returnToOrigin(const std::string &callerAddress) {
         oss << " [" << addr << "]";
     }
     addBlockInternal(oss.str());
+}
+
+std::string Blockchain::chkpotpie(uint32_t fromIndex, uint32_t toIndex) const {
+    if (fromIndex > toIndex) {
+        throw std::out_of_range("chkpotpie: fromIndex must not exceed toIndex");
+    }
+    if (toIndex >= static_cast<uint32_t>(chain.size())) {
+        throw std::out_of_range("chkpotpie: toIndex is out of bounds");
+    }
+    std::string combined;
+    for (uint32_t i = fromIndex; i <= toIndex; ++i) {
+        combined += chain[i].getHash();
+    }
+    return sha256(combined);
 }
 
 void Blockchain::addBlockInternal(const std::string &data) {
