@@ -1,8 +1,21 @@
 #include <gtest/gtest.h>
+#include <type_traits>
 #include "Block.h"
 #include "Blockchain.h"
 #include "Node.h"
 #include "Owners.h"
+
+// ---- Block immutability static checks ----------------------------------
+
+// Block must be copy-constructible (so it can be stored in std::vector) but
+// copy-assignment must be deleted (const members prevent it), enforcing that
+// a block's state can never be silently overwritten.
+static_assert(std::is_copy_constructible<Block>::value,
+              "Block must be copy-constructible");
+static_assert(!std::is_copy_assignable<Block>::value,
+              "Block must not be copy-assignable (fields are const)");
+static_assert(!std::is_move_assignable<Block>::value,
+              "Block must not be move-assignable (fields are const)");
 
 // ---- Block tests -------------------------------------------------------
 

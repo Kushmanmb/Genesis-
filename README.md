@@ -50,3 +50,10 @@ Block #2
 - `OWNER_ADDRESSES` — list of Ethereum addresses with owner-level permissions (currently empty; all owner-gated operations are rejected).
 - `SOCIAL_PROFILE` — owner's GitHub profile: `https://github.com/Kushmanmb`.
 - `COINBASE_ID` — owner's Coinbase ID: `kushman.cb.id`.
+
+## Immutability
+
+Every `Block` has `const` data members (`index`, `timestamp`, `data`, `previousHash`, `hash`), so its state is fixed at construction time and can never be modified afterwards.  This is enforced at the C++ type-system level:
+
+* `Block` is **copy-constructible** — new blocks can be created from existing ones (required for `std::vector` storage).
+* `Block` is **not copy-assignable** and **not move-assignable** — once a block is in the chain it cannot be overwritten.

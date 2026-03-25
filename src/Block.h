@@ -19,11 +19,11 @@ public:
     std::string toString() const;
 
 private:
-    uint32_t    index;
-    std::time_t timestamp;
-    std::string data;
-    std::string previousHash;
-    std::string hash;
+    const uint32_t    index;
+    const std::time_t timestamp;
+    const std::string data;
+    const std::string previousHash;
+    const std::string hash;
 
     std::string calculateHash() const;
 };

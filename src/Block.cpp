@@ -9,8 +9,8 @@ static const std::string ZERO_HASH(64, '0');
 
 Block::Block(uint32_t idx, const std::string &blockData, const std::string &prevHash,
              std::time_t ts)
-    : index(idx), data(blockData), previousHash(prevHash), timestamp(ts) {
-    hash = calculateHash();
+    : index(idx), timestamp(ts), data(blockData), previousHash(prevHash),
+      hash(calculateHash()) {
 }
 
 std::string Block::calculateHash() const {
