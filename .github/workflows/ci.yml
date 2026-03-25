@@ -63,6 +63,11 @@ jobs:
       - name: Build
         run: cmake --build build --parallel
 
+      # ── Run unit tests ───────────────────────────────────────────────────
+      - name: Run unit tests
+        working-directory: build
+        run: ctest --output-on-failure --parallel
+
       # ── Validate blockchain output ────────────────────────────────────────
       - name: Validate blockchain output
         run: |
