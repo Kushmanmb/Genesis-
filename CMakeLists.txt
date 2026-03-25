@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(genesis
     src/main.cpp
+    src/sha256.cpp
     src/Block.cpp
     src/Blockchain.cpp
 )
@@ -19,6 +20,7 @@ find_package(GTest REQUIRED)
 
 add_executable(genesis_tests
     tests/test_blockchain.cpp
+    src/sha256.cpp
     src/Block.cpp
     src/Blockchain.cpp
 )

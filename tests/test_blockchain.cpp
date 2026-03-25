@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "Block.h"
 #include "Blockchain.h"
+#include "Owners.h"
 
 // ---- Block tests -------------------------------------------------------
 
@@ -115,7 +116,7 @@ TEST(BlockchainTest, FetchAllReturnsSameData) {
 
 TEST(BlockchainTest, ReturnToOriginAddsBlock) {
     Blockchain bc;
-    const std::string owner = "0x6fb9e80dDd0f5DC99D7cB38b07e8b298A57bF253";
+    const std::string owner(OWNER_ADDRESSES[0]);
     bc.returnToOrigin(owner);
 
     EXPECT_EQ(bc.fetchAll().size(), 2u);
@@ -123,7 +124,7 @@ TEST(BlockchainTest, ReturnToOriginAddsBlock) {
 
 TEST(BlockchainTest, ReturnToOriginBlockDataContainsOrigin) {
     Blockchain bc;
-    const std::string owner = "0x6fb9e80dDd0f5DC99D7cB38b07e8b298A57bF253";
+    const std::string owner(OWNER_ADDRESSES[0]);
     bc.returnToOrigin(owner);
 
     const auto &chain = bc.fetchAll();
@@ -134,14 +135,14 @@ TEST(BlockchainTest, ReturnToOriginBlockDataContainsOrigin) {
 
 TEST(BlockchainTest, ReturnToOriginBlockDataContainsOwnerAddresses) {
     Blockchain bc;
-    const std::string owner = "0x6fb9e80dDd0f5DC99D7cB38b07e8b298A57bF253";
+    const std::string owner(OWNER_ADDRESSES[0]);
     bc.returnToOrigin(owner);
 
     const auto &chain = bc.fetchAll();
     ASSERT_EQ(chain.size(), 2u);
     const std::string &data = chain[1].getData();
-    EXPECT_NE(data.find("0x6fb9e80dDd0f5DC99D7cB38b07e8b298A57bF253"), std::string::npos);
-    EXPECT_NE(data.find("0x0540e1dA908D032D2F74D50C06397cB5f2cbfDdB"), std::string::npos);
+    EXPECT_NE(data.find(OWNER_ADDRESSES[0]), std::string::npos);
+    EXPECT_NE(data.find(OWNER_ADDRESSES[1]), std::string::npos);
 }
 
 TEST(BlockchainTest, ReturnToOriginDeniedForNonOwner) {
@@ -150,4 +151,47 @@ TEST(BlockchainTest, ReturnToOriginDeniedForNonOwner) {
         bc.returnToOrigin("0x0000000000000000000000000000000000000000"),
         std::runtime_error
     );
+}
+
+// ---- chkpotpie tests ---------------------------------------------------
+
+TEST(BlockchainTest, ChkpotpieReturnsSha256Hash) {
+    Blockchain bc;
+    bc.addBlock("A");
+    const std::string result = bc.chkpotpie(0, 1);
+
+    ASSERT_EQ(result.size(), 64u);
+    for (char c : result) {
+        EXPECT_TRUE((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f'))
+            << "Non-hex character: " << c;
+    }
+}
+
+TEST(BlockchainTest, ChkpotpieIsDeterministic) {
+    Blockchain bc;
+    bc.addBlock("A");
+    bc.addBlock("B");
+
+    EXPECT_EQ(bc.chkpotpie(0, 0), bc.chkpotpie(0, 0));
+    EXPECT_EQ(bc.chkpotpie(0, 2), bc.chkpotpie(0, 2));
+}
+
+TEST(BlockchainTest, ChkpotpieSingleBlockEqualsBlockHash) {
+    Blockchain bc;
+    // chkpotpie over a single block is sha256 of that block's hash.
+    // Verify it returns a valid 64-char hex string distinct from the block hash itself.
+    const std::string result = bc.chkpotpie(0, 0);
+    ASSERT_EQ(result.size(), 64u);
+    EXPECT_NE(result, bc.fetchAll()[0].getHash());
+}
+
+TEST(BlockchainTest, ChkpotpieThrowsOnOutOfRangeIndex) {
+    Blockchain bc;
+    EXPECT_THROW(bc.chkpotpie(0, 5), std::out_of_range);
+}
+
+TEST(BlockchainTest, ChkpotpieThrowsWhenFromExceedsTo) {
+    Blockchain bc;
+    bc.addBlock("A");
+    EXPECT_THROW(bc.chkpotpie(1, 0), std::out_of_range);
 }

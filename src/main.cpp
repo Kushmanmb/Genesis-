@@ -6,9 +6,9 @@
 int main() {
     Blockchain bc;
 
-    // Authorised owner addresses
-    const std::string owner1 = "0x6fb9e80dDd0f5DC99D7cB38b07e8b298A57bF253";
-    const std::string owner2 = "0x0540e1dA908D032D2F74D50C06397cB5f2cbfDdB";
+    // Authorised owner addresses — sourced from the canonical OWNER_ADDRESSES list.
+    const std::string owner1(OWNER_ADDRESSES[0]);
+    const std::string owner2(OWNER_ADDRESSES[1]);
 
     // Owner 1 adds a block
     bc.addBlock("Block 1 data", owner1);
@@ -30,5 +30,13 @@ int main() {
     for (const Block &b : bc.fetchAll()) {
         std::cout << b.toString();
     }
+
+    // chkpotpie: SHA-256 path over all blocks in the chain
+    const auto &chain = bc.fetchAll();
+    if (!chain.empty()) {
+        std::cout << "chkpotpie(0, " << chain.size() - 1 << "): "
+                  << bc.chkpotpie(0, static_cast<uint32_t>(chain.size() - 1)) << "\n";
+    }
+
     return 0;
 }
