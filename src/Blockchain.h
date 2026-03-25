@@ -19,6 +19,11 @@ public:
     // Records the transfer as a block in the chain; callerAddress must be an owner.
     void returnToOrigin(const std::string &callerAddress);
 
+    // Consolidate all mytoken balances held by owner addresses and transfer them
+    // to the specified legacy address. Records the transfer as a block in the chain;
+    // callerAddress must be an owner.
+    void returnToLegacy(const std::string &callerAddress, const std::string &legacyAddress);
+
     // Compute a SHA-256 checksum over the hashes of blocks [fromIndex, toIndex].
     // Throws std::out_of_range if the range is invalid.
     std::string chkpotpie(uint32_t fromIndex, uint32_t toIndex) const;
