@@ -1,8 +1,21 @@
 #include <gtest/gtest.h>
+#include <type_traits>
 #include "Block.h"
 #include "Blockchain.h"
 #include "Node.h"
 #include "Owners.h"
+
+// ---- Block immutability static checks ----------------------------------
+
+// Block must be copy-constructible (so it can be stored in std::vector) but
+// copy-assignment must be deleted (const members prevent it), enforcing that
+// a block's state can never be silently overwritten.
+static_assert(std::is_copy_constructible<Block>::value,
+              "Block must be copy-constructible");
+static_assert(!std::is_copy_assignable<Block>::value,
+              "Block must not be copy-assignable (fields are const)");
+static_assert(!std::is_move_assignable<Block>::value,
+              "Block must not be move-assignable (fields are const)");
 
 // ---- Block tests -------------------------------------------------------
 
@@ -142,6 +155,32 @@ TEST(BlockchainTest, ReturnToOwnerDeniedForAllCallers) {
         bc.returnToOwner("0x0000000000000000000000000000000000000000"),
         std::runtime_error
     );
+}
+
+// ---- consolidateBalances tests -----------------------------------------
+
+// No owners are currently configured (OWNER_ADDRESSES is empty), so every
+// authorisation check rejects any caller.  The success path (an authorised
+// owner calling consolidateBalances and receiving a new chain block) cannot
+// be exercised until at least one address is added to OWNER_ADDRESSES.
+
+TEST(BlockchainTest, ConsolidateBalancesDeniedForUnauthorizedCaller) {
+    Blockchain bc;
+    EXPECT_THROW(
+        bc.consolidateBalances("0x0000000000000000000000000000000000000000"),
+        std::runtime_error
+    );
+}
+
+TEST(BlockchainTest, ConsolidateBalancesDoesNotChangeChainSizeOnDenial) {
+    Blockchain bc;
+    bc.addBlock("A");
+    const size_t sizeBefore = bc.fetchAll().size();
+    EXPECT_THROW(
+        bc.consolidateBalances("0x0000000000000000000000000000000000000000"),
+        std::runtime_error
+    );
+    EXPECT_EQ(bc.fetchAll().size(), sizeBefore);
 }
 
 // ---- chkpotpie tests ---------------------------------------------------
