@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "Block.h"
 #include "Blockchain.h"
+#include "Node.h"
 #include "Owners.h"
 
 // ---- Block tests -------------------------------------------------------
@@ -240,4 +241,74 @@ TEST(BlockchainTest, ChkpotpieThrowsWhenFromExceedsTo) {
     Blockchain bc;
     bc.addBlock("A");
     EXPECT_THROW(bc.chkpotpie(1, 0), std::out_of_range);
+}
+
+// ---- Node tests --------------------------------------------------------
+
+TEST(NodeTest, StartsNotRunning) {
+    Node node;
+    EXPECT_FALSE(node.isRunning());
+}
+
+TEST(NodeTest, IsRunningAfterStart) {
+    Node node;
+    node.start();
+    EXPECT_TRUE(node.isRunning());
+}
+
+TEST(NodeTest, NotRunningAfterStop) {
+    Node node;
+    node.start();
+    node.stop();
+    EXPECT_FALSE(node.isRunning());
+}
+
+TEST(NodeTest, StartIsIdempotent) {
+    Node node;
+    node.start();
+    node.start();
+    EXPECT_TRUE(node.isRunning());
+}
+
+TEST(NodeTest, StopIsIdempotent) {
+    Node node;
+    node.stop();
+    node.stop();
+    EXPECT_FALSE(node.isRunning());
+}
+
+TEST(NodeTest, AddBlockRequiresRunning) {
+    Node node;
+    const std::string owner(OWNER_ADDRESSES[0]);
+    EXPECT_THROW(node.addBlock("data", owner), std::runtime_error);
+}
+
+TEST(NodeTest, FetchAllRequiresRunning) {
+    Node node;
+    EXPECT_THROW(node.fetchAll(), std::runtime_error);
+}
+
+TEST(NodeTest, AddBlockWhenRunning) {
+    Node node;
+    node.start();
+    const std::string owner(OWNER_ADDRESSES[0]);
+    node.addBlock("test data", owner);
+    EXPECT_EQ(node.fetchAll().size(), 2u);  // genesis + 1
+}
+
+TEST(NodeTest, AddBlockDeniedForNonOwner) {
+    Node node;
+    node.start();
+    EXPECT_THROW(
+        node.addBlock("data", "0x0000000000000000000000000000000000000000"),
+        std::runtime_error
+    );
+}
+
+TEST(NodeTest, FetchAllStartsWithGenesisBlock) {
+    Node node;
+    node.start();
+    const auto &chain = node.fetchAll();
+    ASSERT_EQ(chain.size(), 1u);
+    EXPECT_EQ(chain[0].getData(), "Genesis Block");
 }
