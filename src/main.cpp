@@ -1,8 +1,14 @@
 #include <iostream>
-#include "Block.h"
+#include "Blockchain.h"
 
 int main() {
-    Block genesis = Block::createGenesis();
-    std::cout << "=== Genesis Block ===\n" << genesis.toString();
+    Blockchain bc;
+    bc.addBlock("Block 1 data");
+    bc.addBlock("Block 2 data");
+
+    std::cout << "=== All Blocks ===\n";
+    for (const Block &b : bc.fetchAll()) {
+        std::cout << b.toString();
+    }
     return 0;
 }

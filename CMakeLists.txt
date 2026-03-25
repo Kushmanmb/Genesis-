@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_executable(genesis
     src/main.cpp
     src/Block.cpp
+    src/Blockchain.cpp
 )
 
 target_include_directories(genesis PRIVATE src)
