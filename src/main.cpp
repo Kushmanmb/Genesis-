@@ -72,6 +72,16 @@ int main() {
         std::cout << b.toString();
     }
 
+    // Demonstrate getTrending: add several blocks referencing the social profile
+    // multiple times so that it rises to the top of the trending list.
+    bc.addBlock("Data linked to " + socialProfile);
+    bc.addBlock("Data linked to " + socialProfile);
+
+    std::cout << "\n=== Top 3 Trending Block Data ===\n";
+    for (const auto &entry : bc.getTrending(3)) {
+        std::cout << "  [" << entry.second << "x] " << entry.first << "\n";
+    }
+
     // Stop the node
     node.stop();
     std::cout << "Node stopped: " << (!node.isRunning() ? "yes" : "no") << "\n";
