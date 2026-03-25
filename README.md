@@ -48,5 +48,5 @@ Block #2
 ## Owner Identity Constants (`Owners.h`)
 
 - `OWNER_ADDRESSES` — list of Ethereum addresses with owner-level permissions (currently empty; all owner-gated operations are rejected).
-- `SOCIAL_PROFILE` — owner's X.com profile: `https://x.com/Kushmanmb`.
+- `SOCIAL_PROFILE` — owner's GitHub profile: `https://github.com/Kushmanmb`.
 - `COINBASE_ID` — owner's Coinbase ID: `kushman.cb.id`.

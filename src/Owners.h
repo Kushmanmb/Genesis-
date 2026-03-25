@@ -10,7 +10,7 @@
 inline constexpr std::array<std::string_view, 0> OWNER_ADDRESSES = {};
 
 // Social profile associated with the owner of this blockchain.
-inline constexpr std::string_view SOCIAL_PROFILE = "https://x.com/Kushmanmb";
+inline constexpr std::string_view SOCIAL_PROFILE = "https://github.com/Kushmanmb";
 
 // Coinbase ID associated with the owner of this blockchain.
 inline constexpr std::string_view COINBASE_ID = "kushman.cb.id";
