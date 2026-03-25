@@ -351,3 +351,71 @@ TEST(BlockchainTest, FetchAllFromFacebookProfileBlockHasValidProperties) {
     EXPECT_EQ(matches[0].getIndex(), 1u);
     ASSERT_EQ(matches[0].getHash().size(), 64u);
 }
+
+// ---- getTrending tests -------------------------------------------------
+
+TEST(BlockchainTest, GetTrendingReturnsEmptyForTopNZero) {
+    Blockchain bc;
+    bc.addBlock("A");
+    EXPECT_TRUE(bc.getTrending(0).empty());
+}
+
+TEST(BlockchainTest, GetTrendingOnGenesisOnlyChain) {
+    Blockchain bc;
+    // Only the genesis block is present; topN=1 should return it.
+    const auto trending = bc.getTrending(1);
+    ASSERT_EQ(trending.size(), 1u);
+    EXPECT_EQ(trending[0].first, "Genesis Block");
+    EXPECT_EQ(trending[0].second, 1u);
+}
+
+TEST(BlockchainTest, GetTrendingReturnsMostFrequentFirst) {
+    Blockchain bc;
+    bc.addBlock("popular");
+    bc.addBlock("popular");
+    bc.addBlock("popular");
+    bc.addBlock("rare");
+
+    const auto trending = bc.getTrending(2);
+    ASSERT_GE(trending.size(), 1u);
+    EXPECT_EQ(trending[0].first, "popular");
+    EXPECT_EQ(trending[0].second, 3u);
+}
+
+TEST(BlockchainTest, GetTrendingLimitsResultsToTopN) {
+    Blockchain bc;
+    bc.addBlock("A");
+    bc.addBlock("B");
+    bc.addBlock("C");
+    bc.addBlock("D");
+
+    // Only 2 results requested even though 5 unique data strings exist (incl. genesis).
+    const auto trending = bc.getTrending(2);
+    EXPECT_EQ(trending.size(), 2u);
+}
+
+TEST(BlockchainTest, GetTrendingCountsReflectDuplicates) {
+    Blockchain bc;
+    bc.addBlock("x");
+    bc.addBlock("x");
+
+    const auto trending = bc.getTrending(5);
+    // Find "x" in the results.
+    bool found = false;
+    for (const auto &entry : trending) {
+        if (entry.first == "x") {
+            EXPECT_EQ(entry.second, 2u);
+            found = true;
+        }
+    }
+    EXPECT_TRUE(found) << "\"x\" not found in trending results";
+}
+
+TEST(BlockchainTest, GetTrendingTopNLargerThanChainReturnsAll) {
+    Blockchain bc;
+    bc.addBlock("only");
+
+    // Chain has 2 unique entries (genesis + "only"); requesting 100 should return 2.
+    const auto trending = bc.getTrending(100);
+    EXPECT_EQ(trending.size(), 2u);
+}

@@ -1,6 +1,8 @@
 #include "Blockchain.h"
 #include "sha256.h"
 
+#include <algorithm>
+#include <map>
 #include <sstream>
 #include <stdexcept>
 
@@ -110,4 +112,28 @@ std::vector<Block> Blockchain::fetchAllFrom(const std::string &identifier) const
         }
     }
     return result;
+}
+
+std::vector<std::pair<std::string, std::size_t>>
+Blockchain::getTrending(std::size_t topN) const {
+    if (topN == 0 || chain.empty()) {
+        return {};
+    }
+
+    std::map<std::string, std::size_t> counts;
+    for (const auto &block : chain) {
+        counts[block.getData()]++;
+    }
+
+    std::vector<std::pair<std::string, std::size_t>> ranked(counts.begin(), counts.end());
+    std::sort(ranked.begin(), ranked.end(),
+              [](const std::pair<std::string, std::size_t> &a,
+                 const std::pair<std::string, std::size_t> &b) {
+                  return b.second < a.second;
+              });
+
+    if (ranked.size() > topN) {
+        ranked.resize(topN);
+    }
+    return ranked;
 }
