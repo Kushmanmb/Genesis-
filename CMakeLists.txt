@@ -11,3 +11,20 @@ add_executable(genesis
 )
 
 target_include_directories(genesis PRIVATE src)
+
+# Tests
+enable_testing()
+
+find_package(GTest REQUIRED)
+
+add_executable(genesis_tests
+    tests/test_blockchain.cpp
+    src/Block.cpp
+    src/Blockchain.cpp
+)
+
+target_include_directories(genesis_tests PRIVATE src)
+target_link_libraries(genesis_tests GTest::GTest GTest::Main)
+
+include(GoogleTest)
+gtest_discover_tests(genesis_tests)
