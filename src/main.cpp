@@ -10,6 +10,9 @@ int main() {
     node.start();
     std::cout << "Node started: " << (node.isRunning() ? "yes" : "no") << "\n";
 
+    // Blockchain instance for demonstrating block operations.
+    Blockchain bc;
+
     // Add blocks anonymously — no contributors are configured.
     bc.addBlock("Block 1 data");
     bc.addBlock("Block 2 data");
@@ -58,7 +61,7 @@ int main() {
     }
 
     std::cout << "=== All Blocks ===\n";
-    for (const Block &b : node.fetchAll()) {
+    for (const Block &b : bc.fetchAll()) {
         std::cout << b.toString();
     }
 
