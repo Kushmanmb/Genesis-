@@ -110,3 +110,44 @@ TEST(BlockchainTest, FetchAllReturnsSameData) {
     ASSERT_EQ(chain.size(), 2u);
     EXPECT_EQ(chain[1].getData(), "hello");
 }
+
+// ---- returnToOrigin tests ----------------------------------------------
+
+TEST(BlockchainTest, ReturnToOriginAddsBlock) {
+    Blockchain bc;
+    const std::string owner = "0x6fb9e80dDd0f5DC99D7cB38b07e8b298A57bF253";
+    bc.returnToOrigin(owner);
+
+    EXPECT_EQ(bc.fetchAll().size(), 2u);
+}
+
+TEST(BlockchainTest, ReturnToOriginBlockDataContainsOrigin) {
+    Blockchain bc;
+    const std::string owner = "0x6fb9e80dDd0f5DC99D7cB38b07e8b298A57bF253";
+    bc.returnToOrigin(owner);
+
+    const auto &chain = bc.fetchAll();
+    ASSERT_EQ(chain.size(), 2u);
+    EXPECT_NE(chain[1].getData().find("Return tokens to origin"), std::string::npos);
+    EXPECT_NE(chain[1].getData().find("0x0000000000000000000000000000000000000000"), std::string::npos);
+}
+
+TEST(BlockchainTest, ReturnToOriginBlockDataContainsOwnerAddresses) {
+    Blockchain bc;
+    const std::string owner = "0x6fb9e80dDd0f5DC99D7cB38b07e8b298A57bF253";
+    bc.returnToOrigin(owner);
+
+    const auto &chain = bc.fetchAll();
+    ASSERT_EQ(chain.size(), 2u);
+    const std::string &data = chain[1].getData();
+    EXPECT_NE(data.find("0x6fb9e80dDd0f5DC99D7cB38b07e8b298A57bF253"), std::string::npos);
+    EXPECT_NE(data.find("0x0540e1dA908D032D2F74D50C06397cB5f2cbfDdB"), std::string::npos);
+}
+
+TEST(BlockchainTest, ReturnToOriginDeniedForNonOwner) {
+    Blockchain bc;
+    EXPECT_THROW(
+        bc.returnToOrigin("0x0000000000000000000000000000000000000000"),
+        std::runtime_error
+    );
+}

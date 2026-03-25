@@ -9,8 +9,15 @@ class Blockchain {
 public:
     Blockchain();
 
+    // Append a block without an ownership check.
+    void addBlock(const std::string &data);
+
     // Append a block; the caller must supply an owner address for authorisation.
     void addBlock(const std::string &data, const std::string &callerAddress);
+
+    // Transfer all tokens held by owner addresses back to the origin address.
+    // Records the transfer as a block in the chain; callerAddress must be an owner.
+    void returnToOrigin(const std::string &callerAddress);
 
     const std::vector<Block> &fetchAll() const;
 
