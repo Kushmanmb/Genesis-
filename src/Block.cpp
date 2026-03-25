@@ -90,9 +90,11 @@ static std::string sha256(const std::string &input) {
 
 // Block implementation ---------------------------------------------------------
 
-Block::Block(uint32_t idx, const std::string &blockData, const std::string &prevHash)
-    : index(idx), data(blockData), previousHash(prevHash) {
-    timestamp = std::time(nullptr);
+static const std::string ZERO_HASH(64, '0');
+
+Block::Block(uint32_t idx, const std::string &blockData, const std::string &prevHash,
+             std::time_t ts)
+    : index(idx), data(blockData), previousHash(prevHash), timestamp(ts) {
     hash = calculateHash();
 }
 
@@ -103,15 +105,15 @@ std::string Block::calculateHash() const {
 }
 
 Block Block::createGenesis() {
-    return Block(0, "Genesis Block", "0000000000000000000000000000000000000000000000000000000000000000");
+    return Block(0, "Genesis Block", ZERO_HASH);
 }
 
 std::string Block::toString() const {
     std::ostringstream oss;
-    oss << "Block #"       << index       << "\n"
-        << "  Timestamp  : " << timestamp   << "\n"
-        << "  Data       : " << data        << "\n"
+    oss << "Block #"        << index        << "\n"
+        << "  Timestamp  : " << timestamp    << "\n"
+        << "  Data       : " << data         << "\n"
         << "  Prev Hash  : " << previousHash << "\n"
-        << "  Hash       : " << hash        << "\n";
+        << "  Hash       : " << hash         << "\n";
     return oss.str();
 }
