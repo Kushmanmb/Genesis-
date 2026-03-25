@@ -6,7 +6,14 @@ Blockchain::Blockchain() {
     chain.push_back(Block::createGenesis());
 }
 
-void Blockchain::addBlock(const std::string &data) {
+void Blockchain::addBlock(const std::string &data, const std::string &callerAddress) {
+    if (!isOwner(callerAddress)) {
+        throw std::runtime_error("Permission denied: caller is not authorised");
+    }
+    addBlockInternal(data);
+}
+
+void Blockchain::addBlockInternal(const std::string &data) {
     if (chain.empty()) {
         throw std::runtime_error("Blockchain is in an invalid state: chain is empty");
     }
