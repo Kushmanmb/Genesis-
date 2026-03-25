@@ -50,6 +50,17 @@ void Blockchain::returnToLegacy(const std::string &callerAddress,
     addBlockInternal(oss.str());
 }
 
+void Blockchain::returnToOwner(const std::string &callerAddress) {
+    requireOwner(callerAddress);
+
+    std::ostringstream oss;
+    oss << "Consolidate mytoken balances and return to owner (" << callerAddress << "):";
+    for (const auto &addr : OWNER_ADDRESSES) {
+        oss << " [" << addr << "]";
+    }
+    addBlockInternal(oss.str());
+}
+
 std::string Blockchain::chkpotpie(uint32_t fromIndex, uint32_t toIndex) const {
     if (fromIndex > toIndex) {
         throw std::out_of_range("chkpotpie: fromIndex must not exceed toIndex");
@@ -78,4 +89,14 @@ void Blockchain::addBlockInternal(const std::string &data) {
 
 const std::vector<Block> &Blockchain::fetchAll() const {
     return chain;
+}
+
+std::vector<Block> Blockchain::fetchAllFrom(const std::string &identifier) const {
+    std::vector<Block> result;
+    for (const auto &block : chain) {
+        if (block.getData().find(identifier) != std::string::npos) {
+            result.push_back(block);
+        }
+    }
+    return result;
 }
