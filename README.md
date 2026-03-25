@@ -41,4 +41,12 @@ Block #2
 - `addBlock(data, callerAddress)` — appends a new block; throws if `callerAddress` is not an authorised owner.
 - `returnToOrigin(callerAddress)` — records a block transferring all owner tokens back to the origin address; `callerAddress` must be an authorised owner.
 - `returnToLegacy(callerAddress, legacyAddress)` — consolidates all mytoken balances held by owner addresses and records a block transferring them to the specified legacy address; `callerAddress` must be an authorised owner.
+- `returnToOwner(callerAddress)` — consolidates all mytoken balances held by owner addresses and records a block transferring them back to `callerAddress`; `callerAddress` must be an authorised owner.
 - `fetchAll()` — returns a const reference to the full vector of blocks.
+- `fetchAllFrom(identifier)` — returns a copy of all blocks whose data field contains `identifier`.
+
+## Owner Identity Constants (`Owners.h`)
+
+- `OWNER_ADDRESSES` — list of Ethereum addresses with owner-level permissions (currently empty; all owner-gated operations are rejected).
+- `SOCIAL_PROFILE` — owner's X.com profile: `https://x.com/Kushmanmb`.
+- `COINBASE_ID` — owner's Coinbase ID: `kushman.cb.id`.

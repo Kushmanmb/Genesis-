@@ -114,38 +114,7 @@ TEST(BlockchainTest, FetchAllReturnsSameData) {
 
 // ---- returnToOrigin tests ----------------------------------------------
 
-TEST(BlockchainTest, ReturnToOriginAddsBlock) {
-    Blockchain bc;
-    const std::string owner(OWNER_ADDRESSES[0]);
-    bc.returnToOrigin(owner);
-
-    EXPECT_EQ(bc.fetchAll().size(), 2u);
-}
-
-TEST(BlockchainTest, ReturnToOriginBlockDataContainsOrigin) {
-    Blockchain bc;
-    const std::string owner(OWNER_ADDRESSES[0]);
-    bc.returnToOrigin(owner);
-
-    const auto &chain = bc.fetchAll();
-    ASSERT_EQ(chain.size(), 2u);
-    EXPECT_NE(chain[1].getData().find("Return tokens to origin"), std::string::npos);
-    EXPECT_NE(chain[1].getData().find("0x0000000000000000000000000000000000000000"), std::string::npos);
-}
-
-TEST(BlockchainTest, ReturnToOriginBlockDataContainsOwnerAddresses) {
-    Blockchain bc;
-    const std::string owner(OWNER_ADDRESSES[0]);
-    bc.returnToOrigin(owner);
-
-    const auto &chain = bc.fetchAll();
-    ASSERT_EQ(chain.size(), 2u);
-    const std::string &data = chain[1].getData();
-    EXPECT_NE(data.find(OWNER_ADDRESSES[0]), std::string::npos);
-    EXPECT_NE(data.find(OWNER_ADDRESSES[1]), std::string::npos);
-}
-
-TEST(BlockchainTest, ReturnToOriginDeniedForNonOwner) {
+TEST(BlockchainTest, ReturnToOriginDeniedForAllCallers) {
     Blockchain bc;
     EXPECT_THROW(
         bc.returnToOrigin("0x0000000000000000000000000000000000000000"),
@@ -155,46 +124,21 @@ TEST(BlockchainTest, ReturnToOriginDeniedForNonOwner) {
 
 // ---- returnToLegacy tests ----------------------------------------------
 
-TEST(BlockchainTest, ReturnToLegacyAddsBlock) {
-    Blockchain bc;
-    const std::string owner(OWNER_ADDRESSES[0]);
-    const std::string legacyAddr = "0xB29380d2FC97F857E1D7De0cB3F1E2b8dc5caf23";
-    bc.returnToLegacy(owner, legacyAddr);
-
-    EXPECT_EQ(bc.fetchAll().size(), 2u);
-}
-
-TEST(BlockchainTest, ReturnToLegacyBlockDataContainsLegacyAddress) {
-    Blockchain bc;
-    const std::string owner(OWNER_ADDRESSES[0]);
-    const std::string legacyAddr = "0xB29380d2FC97F857E1D7De0cB3F1E2b8dc5caf23";
-    bc.returnToLegacy(owner, legacyAddr);
-
-    const auto &chain = bc.fetchAll();
-    ASSERT_EQ(chain.size(), 2u);
-    const std::string &data = chain[1].getData();
-    EXPECT_NE(data.find("Consolidate mytoken balances"), std::string::npos);
-    EXPECT_NE(data.find(legacyAddr), std::string::npos);
-}
-
-TEST(BlockchainTest, ReturnToLegacyBlockDataContainsOwnerAddresses) {
-    Blockchain bc;
-    const std::string owner(OWNER_ADDRESSES[0]);
-    const std::string legacyAddr = "0xB29380d2FC97F857E1D7De0cB3F1E2b8dc5caf23";
-    bc.returnToLegacy(owner, legacyAddr);
-
-    const auto &chain = bc.fetchAll();
-    ASSERT_EQ(chain.size(), 2u);
-    const std::string &data = chain[1].getData();
-    EXPECT_NE(data.find(OWNER_ADDRESSES[0]), std::string::npos);
-    EXPECT_NE(data.find(OWNER_ADDRESSES[1]), std::string::npos);
-}
-
-TEST(BlockchainTest, ReturnToLegacyDeniedForNonOwner) {
+TEST(BlockchainTest, ReturnToLegacyDeniedForAllCallers) {
     Blockchain bc;
     const std::string legacyAddr = "0xB29380d2FC97F857E1D7De0cB3F1E2b8dc5caf23";
     EXPECT_THROW(
         bc.returnToLegacy("0x0000000000000000000000000000000000000000", legacyAddr),
+        std::runtime_error
+    );
+}
+
+// ---- returnToOwner tests -----------------------------------------------
+
+TEST(BlockchainTest, ReturnToOwnerDeniedForAllCallers) {
+    Blockchain bc;
+    EXPECT_THROW(
+        bc.returnToOwner("0x0000000000000000000000000000000000000000"),
         std::runtime_error
     );
 }
@@ -240,4 +184,88 @@ TEST(BlockchainTest, ChkpotpieThrowsWhenFromExceedsTo) {
     Blockchain bc;
     bc.addBlock("A");
     EXPECT_THROW(bc.chkpotpie(1, 0), std::out_of_range);
+}
+
+// ---- fetchAllFrom tests ------------------------------------------------
+
+TEST(BlockchainTest, FetchAllFromReturnsMatchingBlocks) {
+    Blockchain bc;
+    const std::string identifier = "https://x.com/Kushmanmb";
+    bc.addBlock("Data linked to " + identifier);
+    bc.addBlock("unrelated block");
+
+    const auto matches = bc.fetchAllFrom(identifier);
+    ASSERT_EQ(matches.size(), 1u);
+    EXPECT_NE(matches[0].getData().find(identifier), std::string::npos);
+}
+
+TEST(BlockchainTest, FetchAllFromReturnsEmptyWhenNoMatch) {
+    Blockchain bc;
+    bc.addBlock("some data");
+
+    EXPECT_TRUE(bc.fetchAllFrom("https://x.com/Kushmanmb").empty());
+}
+
+TEST(BlockchainTest, FetchAllFromReturnsMultipleMatchingBlocks) {
+    Blockchain bc;
+    const std::string identifier = "https://x.com/Kushmanmb";
+    bc.addBlock("First block linked to " + identifier);
+    bc.addBlock("Second block linked to " + identifier);
+    bc.addBlock("unrelated block");
+
+    const auto matches = bc.fetchAllFrom(identifier);
+    ASSERT_EQ(matches.size(), 2u);
+}
+
+TEST(BlockchainTest, FetchAllFromResultsAreProperBlocks) {
+    Blockchain bc;
+    const std::string identifier = "https://x.com/Kushmanmb";
+    bc.addBlock("Data linked to " + identifier);
+
+    const auto matches = bc.fetchAllFrom(identifier);
+    ASSERT_EQ(matches.size(), 1u);
+    EXPECT_EQ(matches[0].getIndex(), 1u);
+    EXPECT_NE(matches[0].getHash(), "");
+}
+
+// ---- fetchAllFrom(COINBASE_ID) tests -----------------------------------
+
+TEST(BlockchainTest, FetchAllFromCoinbaseIdReturnsMatchingBlock) {
+    Blockchain bc;
+    const std::string id(COINBASE_ID);
+    bc.addBlock("Data linked to " + id);
+    bc.addBlock("unrelated block");
+
+    const auto matches = bc.fetchAllFrom(id);
+    ASSERT_EQ(matches.size(), 1u);
+    EXPECT_NE(matches[0].getData().find(id), std::string::npos);
+}
+
+TEST(BlockchainTest, FetchAllFromCoinbaseIdReturnsEmptyWhenNoMatch) {
+    Blockchain bc;
+    bc.addBlock("some data");
+
+    EXPECT_TRUE(bc.fetchAllFrom(std::string(COINBASE_ID)).empty());
+}
+
+TEST(BlockchainTest, FetchAllFromCoinbaseIdReturnsMultipleMatches) {
+    Blockchain bc;
+    const std::string id(COINBASE_ID);
+    bc.addBlock("First block linked to " + id);
+    bc.addBlock("Second block linked to " + id);
+    bc.addBlock("unrelated block");
+
+    const auto matches = bc.fetchAllFrom(id);
+    ASSERT_EQ(matches.size(), 2u);
+}
+
+TEST(BlockchainTest, FetchAllFromCoinbaseIdBlockHasValidProperties) {
+    Blockchain bc;
+    const std::string id(COINBASE_ID);
+    bc.addBlock("Data linked to " + id);
+
+    const auto matches = bc.fetchAllFrom(id);
+    ASSERT_EQ(matches.size(), 1u);
+    EXPECT_EQ(matches[0].getIndex(), 1u);
+    ASSERT_EQ(matches[0].getHash().size(), 64u);
 }

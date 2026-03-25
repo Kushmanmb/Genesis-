@@ -6,29 +6,52 @@
 int main() {
     Blockchain bc;
 
-    // Authorised owner addresses — sourced from the canonical OWNER_ADDRESSES list.
-    const std::string owner1(OWNER_ADDRESSES[0]);
-    const std::string owner2(OWNER_ADDRESSES[1]);
+    // Add blocks anonymously — no contributors are configured.
+    bc.addBlock("Block 1 data");
+    bc.addBlock("Block 2 data");
 
-    // Owner 1 adds a block
-    bc.addBlock("Block 1 data", owner1);
-
-    // Owner 2 adds a block
-    bc.addBlock("Block 2 data", owner2);
-
-    // Demonstrate that a non-owner cannot add a block
+    // Demonstrate that all owner-gated operations are rejected (no contributors).
     try {
         bc.addBlock("Block 3 data", "0x0000000000000000000000000000000000000000");
     } catch (const std::runtime_error &e) {
-        std::cerr << "Caught expected error: " << e.what() << "\n";
+        std::cerr << "Caught expected error (addBlock): " << e.what() << "\n";
     }
 
-    // Return all kushmanmb tokens back to origin
-    bc.returnToOrigin(owner1);
+    try {
+        bc.returnToOrigin("0x0000000000000000000000000000000000000000");
+    } catch (const std::runtime_error &e) {
+        std::cerr << "Caught expected error (returnToOrigin): " << e.what() << "\n";
+    }
 
-    // Consolidate mytoken balances and return to the legacy address
-    const std::string legacyAddress = "0xB29380d2FC97F857E1D7De0cB3F1E2b8dc5caf23";
-    bc.returnToLegacy(owner1, legacyAddress);
+    try {
+        bc.returnToLegacy("0x0000000000000000000000000000000000000000",
+                          "0xB29380d2FC97F857E1D7De0cB3F1E2b8dc5caf23");
+    } catch (const std::runtime_error &e) {
+        std::cerr << "Caught expected error (returnToLegacy): " << e.what() << "\n";
+    }
+
+    try {
+        bc.returnToOwner("0x0000000000000000000000000000000000000000");
+    } catch (const std::runtime_error &e) {
+        std::cerr << "Caught expected error (returnToOwner): " << e.what() << "\n";
+    }
+
+    // Demonstrate fetchAllFrom: add blocks referencing the owner's social profile
+    // and Coinbase ID, then fetch all blocks that contain each identifier.
+    const std::string socialProfile(SOCIAL_PROFILE);
+    const std::string coinbaseId(COINBASE_ID);
+    bc.addBlock("Data linked to " + socialProfile);
+    bc.addBlock("Data linked to " + coinbaseId);
+
+    std::cout << "\n=== Blocks referencing " << socialProfile << " ===\n";
+    for (const Block &b : bc.fetchAllFrom(socialProfile)) {
+        std::cout << b.toString();
+    }
+
+    std::cout << "\n=== Blocks referencing " << coinbaseId << " ===\n";
+    for (const Block &b : bc.fetchAllFrom(coinbaseId)) {
+        std::cout << b.toString();
+    }
 
     std::cout << "=== All Blocks ===\n";
     for (const Block &b : bc.fetchAll()) {
