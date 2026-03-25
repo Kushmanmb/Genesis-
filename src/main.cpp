@@ -26,6 +26,10 @@ int main() {
     // Return all kushmanmb tokens back to origin
     bc.returnToOrigin(owner1);
 
+    // Consolidate mytoken balances and return to the legacy address
+    const std::string legacyAddress = "0xB29380d2FC97F857E1D7De0cB3F1E2b8dc5caf23";
+    bc.returnToLegacy(owner1, legacyAddress);
+
     std::cout << "=== All Blocks ===\n";
     for (const Block &b : bc.fetchAll()) {
         std::cout << b.toString();

@@ -153,6 +153,52 @@ TEST(BlockchainTest, ReturnToOriginDeniedForNonOwner) {
     );
 }
 
+// ---- returnToLegacy tests ----------------------------------------------
+
+TEST(BlockchainTest, ReturnToLegacyAddsBlock) {
+    Blockchain bc;
+    const std::string owner(OWNER_ADDRESSES[0]);
+    const std::string legacyAddr = "0xB29380d2FC97F857E1D7De0cB3F1E2b8dc5caf23";
+    bc.returnToLegacy(owner, legacyAddr);
+
+    EXPECT_EQ(bc.fetchAll().size(), 2u);
+}
+
+TEST(BlockchainTest, ReturnToLegacyBlockDataContainsLegacyAddress) {
+    Blockchain bc;
+    const std::string owner(OWNER_ADDRESSES[0]);
+    const std::string legacyAddr = "0xB29380d2FC97F857E1D7De0cB3F1E2b8dc5caf23";
+    bc.returnToLegacy(owner, legacyAddr);
+
+    const auto &chain = bc.fetchAll();
+    ASSERT_EQ(chain.size(), 2u);
+    const std::string &data = chain[1].getData();
+    EXPECT_NE(data.find("Consolidate mytoken balances"), std::string::npos);
+    EXPECT_NE(data.find(legacyAddr), std::string::npos);
+}
+
+TEST(BlockchainTest, ReturnToLegacyBlockDataContainsOwnerAddresses) {
+    Blockchain bc;
+    const std::string owner(OWNER_ADDRESSES[0]);
+    const std::string legacyAddr = "0xB29380d2FC97F857E1D7De0cB3F1E2b8dc5caf23";
+    bc.returnToLegacy(owner, legacyAddr);
+
+    const auto &chain = bc.fetchAll();
+    ASSERT_EQ(chain.size(), 2u);
+    const std::string &data = chain[1].getData();
+    EXPECT_NE(data.find(OWNER_ADDRESSES[0]), std::string::npos);
+    EXPECT_NE(data.find(OWNER_ADDRESSES[1]), std::string::npos);
+}
+
+TEST(BlockchainTest, ReturnToLegacyDeniedForNonOwner) {
+    Blockchain bc;
+    const std::string legacyAddr = "0xB29380d2FC97F857E1D7De0cB3F1E2b8dc5caf23";
+    EXPECT_THROW(
+        bc.returnToLegacy("0x0000000000000000000000000000000000000000", legacyAddr),
+        std::runtime_error
+    );
+}
+
 // ---- chkpotpie tests ---------------------------------------------------
 
 TEST(BlockchainTest, ChkpotpieReturnsSha256Hash) {
