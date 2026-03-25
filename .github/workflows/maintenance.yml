@@ -1,0 +1,126 @@
+name: Blockchain Maintenance
+
+on:
+  schedule:
+    # Run every Sunday at 02:00 UTC
+    - cron: "0 2 * * 0"
+  workflow_dispatch:
+    inputs:
+      clean_build:
+        description: "Force a clean build (discard cached artifacts)"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+jobs:
+  maintenance:
+    name: Blockchain integrity check & cache maintenance
+    runs-on: self-hosted
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ── Optional clean build ─────────────────────────────────────────────
+      - name: Clean build artifacts
+        if: ${{ github.event.inputs.clean_build == 'true' }}
+        run: |
+          echo "🧹 Removing cached build directory..."
+          rm -rf build
+          ccache --clear || true
+
+      # ── ccache ───────────────────────────────────────────────────────────
+      - name: Set up ccache
+        run: |
+          if ! command -v ccache &>/dev/null; then
+            sudo apt-get update -qq && sudo apt-get install -y ccache
+          fi
+          # Cap cache size to 500 MB
+          ccache --set-config=max_size=500M
+
+      - name: Restore ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: ccache-maintenance-${{ runner.os }}-${{ hashFiles('CMakeLists.txt', '**/*.cpp', '**/*.h') }}
+          restore-keys: |
+            ccache-maintenance-${{ runner.os }}-
+            ccache-${{ runner.os }}-
+
+      # ── Build ────────────────────────────────────────────────────────────
+      - name: Configure (CMake)
+        run: |
+          cmake -B build \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      # ── Integrity checks ─────────────────────────────────────────────────
+      - name: Run blockchain integrity check
+        id: integrity
+        run: |
+          OUTPUT=$(./build/genesis)
+          echo "$OUTPUT"
+
+          BLOCK_COUNT=$(echo "$OUTPUT" | grep -c "^Block #")
+          echo "block_count=$BLOCK_COUNT" >> "$GITHUB_OUTPUT"
+
+          # Verify expected blocks exist
+          for LABEL in "Block #0" "Block #1" "Block #2"; do
+            if ! echo "$OUTPUT" | grep -qF "$LABEL"; then
+              echo "❌ Integrity check FAILED: '$LABEL' missing"
+              exit 1
+            fi
+          done
+
+          # Verify genesis sentinel hash
+          if ! echo "$OUTPUT" | grep -qF "0000000000000000000000000000000000000000000000000000000000000000"; then
+            echo "❌ Integrity check FAILED: genesis zero-hash missing"
+            exit 1
+          fi
+
+          # Verify each block has a non-empty Hash field
+          while IFS= read -r LINE; do
+            if echo "$LINE" | grep -qE "^\s+Hash\s+:"; then
+              HASH_VAL=$(echo "$LINE" | sed 's/.*: //')
+              if [ -z "$HASH_VAL" ]; then
+                echo "❌ Integrity check FAILED: empty hash field"
+                exit 1
+              fi
+            fi
+          done <<< "$OUTPUT"
+
+          echo "✅ Integrity check passed — $BLOCK_COUNT block(s) verified"
+
+      # ── Cache health report ───────────────────────────────────────────────
+      - name: Cache health report
+        if: always()
+        run: |
+          echo "=== ccache statistics ==="
+          ccache --show-stats
+
+          echo ""
+          echo "=== Build directory size ==="
+          du -sh build/ 2>/dev/null || echo "(build directory not present)"
+
+      # ── Summary ──────────────────────────────────────────────────────────
+      - name: Write job summary
+        if: always()
+        run: |
+          {
+            echo "## 🔗 Blockchain Maintenance Report"
+            echo ""
+            echo "| Item | Value |"
+            echo "|------|-------|"
+            echo "| Run date | $(date -u '+%Y-%m-%d %H:%M UTC') |"
+            echo "| Blocks verified | ${{ steps.integrity.outputs.block_count }} |"
+            echo "| Clean build | ${{ github.event.inputs.clean_build || 'false' }} |"
+            echo "| Runner | \`${{ runner.name }}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
