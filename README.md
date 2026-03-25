@@ -42,6 +42,7 @@ Block #2
 - `returnToOrigin(callerAddress)` — records a block transferring all owner tokens back to the origin address; `callerAddress` must be an authorised owner.
 - `returnToLegacy(callerAddress, legacyAddress)` — consolidates all mytoken balances held by owner addresses and records a block transferring them to the specified legacy address; `callerAddress` must be an authorised owner.
 - `returnToOwner(callerAddress)` — consolidates all mytoken balances held by owner addresses and records a block transferring them back to `callerAddress`; `callerAddress` must be an authorised owner.
+- `consolidateBalances(callerAddress)` — consolidates all mytoken balances held by owner addresses into a single chain record without routing them to a specific destination; `callerAddress` must be an authorised owner.
 - `fetchAll()` — returns a const reference to the full vector of blocks.
 - `fetchAllFrom(identifier)` — returns a copy of all blocks whose data field contains `identifier`.
 

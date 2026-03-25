@@ -157,6 +157,32 @@ TEST(BlockchainTest, ReturnToOwnerDeniedForAllCallers) {
     );
 }
 
+// ---- consolidateBalances tests -----------------------------------------
+
+// No owners are currently configured (OWNER_ADDRESSES is empty), so every
+// authorisation check rejects any caller.  The success path (an authorised
+// owner calling consolidateBalances and receiving a new chain block) cannot
+// be exercised until at least one address is added to OWNER_ADDRESSES.
+
+TEST(BlockchainTest, ConsolidateBalancesDeniedForUnauthorizedCaller) {
+    Blockchain bc;
+    EXPECT_THROW(
+        bc.consolidateBalances("0x0000000000000000000000000000000000000000"),
+        std::runtime_error
+    );
+}
+
+TEST(BlockchainTest, ConsolidateBalancesDoesNotChangeChainSizeOnDenial) {
+    Blockchain bc;
+    bc.addBlock("A");
+    const size_t sizeBefore = bc.fetchAll().size();
+    EXPECT_THROW(
+        bc.consolidateBalances("0x0000000000000000000000000000000000000000"),
+        std::runtime_error
+    );
+    EXPECT_EQ(bc.fetchAll().size(), sizeBefore);
+}
+
 // ---- chkpotpie tests ---------------------------------------------------
 
 TEST(BlockchainTest, ChkpotpieReturnsSha256Hash) {
