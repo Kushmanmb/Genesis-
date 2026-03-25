@@ -43,15 +43,22 @@ int main() {
         std::cerr << "Caught expected error (returnToOwner): " << e.what() << "\n";
     }
 
-    // Demonstrate fetchAllFrom: add blocks referencing the owner's social profile
-    // and Coinbase ID, then fetch all blocks that contain each identifier.
+    // Demonstrate fetchAllFrom: add blocks referencing the owner's social profile,
+    // Facebook profile, and Coinbase ID, then fetch all blocks that contain each identifier.
     const std::string socialProfile(SOCIAL_PROFILE);
+    const std::string facebookProfile(FACEBOOK_PROFILE);
     const std::string coinbaseId(COINBASE_ID);
     bc.addBlock("Data linked to " + socialProfile);
+    bc.addBlock("Data linked to " + facebookProfile);
     bc.addBlock("Data linked to " + coinbaseId);
 
     std::cout << "\n=== Blocks referencing " << socialProfile << " ===\n";
     for (const Block &b : bc.fetchAllFrom(socialProfile)) {
+        std::cout << b.toString();
+    }
+
+    std::cout << "\n=== Blocks referencing " << facebookProfile << " ===\n";
+    for (const Block &b : bc.fetchAllFrom(facebookProfile)) {
         std::cout << b.toString();
     }
 
