@@ -3,8 +3,18 @@ name: CI — Build & Validate
 on:
   push:
     branches: ["**"]
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "CMakeLists.txt"
+      - ".github/workflows/ci.yml"
   pull_request:
     branches: ["**"]
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "CMakeLists.txt"
+      - ".github/workflows/ci.yml"
 
 jobs:
   build-and-validate:
