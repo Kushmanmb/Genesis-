@@ -1,0 +1,81 @@
+name: CI — Build & Validate
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  build-and-validate:
+    name: Build and validate blockchain
+    runs-on: self-hosted
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ── ccache ───────────────────────────────────────────────────────────
+      - name: Set up ccache
+        run: |
+          if ! command -v ccache &>/dev/null; then
+            echo "ccache not found – installing..."
+            sudo apt-get update -qq && sudo apt-get install -y ccache
+          fi
+          ccache --version
+
+      - name: Restore ccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: ccache-${{ runner.os }}-${{ hashFiles('CMakeLists.txt', '**/*.cpp', '**/*.h') }}
+          restore-keys: |
+            ccache-${{ runner.os }}-
+
+      # ── CMake build-directory cache ───────────────────────────────────────
+      - name: Restore CMake build cache
+        uses: actions/cache@v4
+        with:
+          path: build
+          key: cmake-build-${{ runner.os }}-${{ hashFiles('CMakeLists.txt', '**/*.cpp', '**/*.h') }}
+          restore-keys: |
+            cmake-build-${{ runner.os }}-
+
+      # ── Configure & build ────────────────────────────────────────────────
+      - name: Configure (CMake)
+        run: |
+          cmake -B build \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      # ── Validate blockchain output ────────────────────────────────────────
+      - name: Validate blockchain output
+        run: |
+          OUTPUT=$(./build/genesis)
+          echo "$OUTPUT"
+
+          # Ensure all three blocks are present
+          for LABEL in "Block #0" "Block #1" "Block #2"; do
+            if ! echo "$OUTPUT" | grep -qF "$LABEL"; then
+              echo "ERROR: '$LABEL' not found in output"
+              exit 1
+            fi
+          done
+
+          # Ensure genesis block has the expected zero previous-hash
+          if ! echo "$OUTPUT" | grep -qF "0000000000000000000000000000000000000000000000000000000000000000"; then
+            echo "ERROR: Genesis block zero-hash sentinel not found"
+            exit 1
+          fi
+
+          echo "✅ Blockchain output validated successfully"
+
+      # ── ccache statistics ────────────────────────────────────────────────
+      - name: Show ccache statistics
+        if: always()
+        run: ccache --show-stats

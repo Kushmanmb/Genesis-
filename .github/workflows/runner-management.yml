@@ -1,0 +1,193 @@
+name: Runner Management
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Action to perform"
+        required: true
+        type: choice
+        options:
+          - register
+          - check-status
+          - remove
+      runner_name:
+        description: "Runner name (used for register and remove)"
+        required: false
+        default: "genesis-runner"
+      runner_labels:
+        description: "Comma-separated labels for the new runner (register only)"
+        required: false
+        default: "self-hosted,genesis,blockchain"
+
+jobs:
+  # ── Register a new self-hosted runner ──────────────────────────────────────
+  register:
+    name: Register self-hosted runner
+    if: ${{ github.event.inputs.action == 'register' }}
+    runs-on: ubuntu-latest   # orchestration runs on GitHub-hosted runner
+    permissions: {}
+
+    steps:
+      - name: Generate runner registration token
+        id: token
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_MGMT_TOKEN }}
+        run: |
+          RESPONSE=$(gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            /repos/${{ github.repository }}/actions/runners/registration-token)
+          echo "token=$(echo "$RESPONSE" | jq -r '.token')" >> "$GITHUB_OUTPUT"
+          echo "expires_at=$(echo "$RESPONSE" | jq -r '.expires_at')" >> "$GITHUB_OUTPUT"
+
+      - name: Print registration instructions
+        run: |
+          LABELS="${{ github.event.inputs.runner_labels }}"
+          NAME="${{ github.event.inputs.runner_name }}"
+          REPO="https://github.com/${{ github.repository }}"
+
+          echo "==========================================================="
+          echo "  Self-Hosted Runner Registration Instructions"
+          echo "==========================================================="
+          echo ""
+          echo "Run the following commands on the target machine:"
+          echo ""
+          echo "  # 1. Download the latest runner package"
+          echo "  mkdir -p ~/actions-runner && cd ~/actions-runner"
+          echo "  RUNNER_VERSION=\$(curl -s https://api.github.com/repos/actions/runner/releases/latest \\"
+          echo "    | jq -r '.tag_name' | sed 's/^v//')"
+          echo "  curl -OL \"https://github.com/actions/runner/releases/download/v\${RUNNER_VERSION}/actions-runner-linux-x64-\${RUNNER_VERSION}.tar.gz\""
+          echo "  tar xzf \"actions-runner-linux-x64-\${RUNNER_VERSION}.tar.gz\""
+          echo ""
+          echo "  # 2. Configure the runner"
+          echo "  ./config.sh \\"
+          echo "    --url $REPO \\"
+          echo "    --token ${{ steps.token.outputs.token }} \\"
+          echo "    --name $NAME \\"
+          echo "    --labels \"$LABELS\" \\"
+          echo "    --unattended"
+          echo ""
+          echo "  # 3. Install and start as a system service (optional)"
+          echo "  sudo ./svc.sh install"
+          echo "  sudo ./svc.sh start"
+          echo ""
+          echo "  Registration token expires at: ${{ steps.token.outputs.expires_at }}"
+          echo "==========================================================="
+
+      - name: Write registration summary
+        run: |
+          {
+            echo "## 🤖 Runner Registration"
+            echo ""
+            echo "| Field | Value |"
+            echo "|-------|-------|"
+            echo "| Runner name | \`${{ github.event.inputs.runner_name }}\` |"
+            echo "| Labels | \`${{ github.event.inputs.runner_labels }}\` |"
+            echo "| Token expires | ${{ steps.token.outputs.expires_at }} |"
+            echo ""
+            echo "> ⚠️ The registration token was printed in the step logs above."
+            echo "> Run the shown commands on your target machine to complete registration."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # ── Check status of all registered self-hosted runners ────────────────────
+  check-status:
+    name: Check runner status
+    if: ${{ github.event.inputs.action == 'check-status' }}
+    runs-on: ubuntu-latest
+    permissions: {}
+
+    steps:
+      - name: List self-hosted runners
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_MGMT_TOKEN }}
+        run: |
+          echo "=== Self-Hosted Runners for ${{ github.repository }} ==="
+          gh api \
+            -H "Accept: application/vnd.github+json" \
+            /repos/${{ github.repository }}/actions/runners \
+            --jq '.runners[] | "Runner: \(.name)  |  Status: \(.status)  |  Busy: \(.busy)  |  Labels: \([.labels[].name] | join(", "))"'
+
+      - name: Write status summary
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_MGMT_TOKEN }}
+        run: |
+          {
+            echo "## 🖥️ Self-Hosted Runner Status"
+            echo ""
+            echo "| Name | Status | Busy | Labels |"
+            echo "|------|--------|------|--------|"
+            gh api \
+              -H "Accept: application/vnd.github+json" \
+              /repos/${{ github.repository }}/actions/runners \
+              --jq '.runners[] | "| \(.name) | \(.status) | \(.busy) | \([.labels[].name] | join(", ")) |"'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # ── Remove a self-hosted runner ────────────────────────────────────────────
+  remove:
+    name: Remove self-hosted runner
+    if: ${{ github.event.inputs.action == 'remove' }}
+    runs-on: ubuntu-latest
+    permissions: {}
+
+    steps:
+      - name: Find runner ID
+        id: find
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_MGMT_TOKEN }}
+        run: |
+          RUNNER_ID=$(gh api \
+            -H "Accept: application/vnd.github+json" \
+            /repos/${{ github.repository }}/actions/runners \
+            --jq '.runners[] | select(.name == "${{ github.event.inputs.runner_name }}") | .id')
+
+          if [ -z "$RUNNER_ID" ]; then
+            echo "ERROR: Runner '${{ github.event.inputs.runner_name }}' not found."
+            exit 1
+          fi
+
+          echo "runner_id=$RUNNER_ID" >> "$GITHUB_OUTPUT"
+          echo "Found runner '${{ github.event.inputs.runner_name }}' with ID: $RUNNER_ID"
+
+      - name: Generate removal token
+        id: removal_token
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_MGMT_TOKEN }}
+        run: |
+          RESPONSE=$(gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            /repos/${{ github.repository }}/actions/runners/remove-token)
+          echo "token=$(echo "$RESPONSE" | jq -r '.token')" >> "$GITHUB_OUTPUT"
+
+      - name: Remove runner via API
+        env:
+          GH_TOKEN: ${{ secrets.RUNNER_MGMT_TOKEN }}
+        run: |
+          gh api \
+            --method DELETE \
+            -H "Accept: application/vnd.github+json" \
+            /repos/${{ github.repository }}/actions/runners/${{ steps.find.outputs.runner_id }}
+          echo "✅ Runner '${{ github.event.inputs.runner_name }}' (ID: ${{ steps.find.outputs.runner_id }}) removed."
+
+      - name: Print removal instructions
+        run: |
+          echo "==========================================================="
+          echo "  To cleanly unregister the runner on the machine itself:"
+          echo "==========================================================="
+          echo ""
+          echo "  cd ~/actions-runner"
+          echo "  sudo ./svc.sh stop"
+          echo "  sudo ./svc.sh uninstall"
+          echo "  ./config.sh remove --token ${{ steps.removal_token.outputs.token }}"
+          echo "==========================================================="
+
+      - name: Write removal summary
+        run: |
+          {
+            echo "## 🗑️ Runner Removal"
+            echo ""
+            echo "Runner **${{ github.event.inputs.runner_name }}** (ID: ${{ steps.find.outputs.runner_id }}) has been removed from GitHub."
+            echo ""
+            echo "> Run the commands printed in the step logs to fully unregister the runner on the machine."
+          } >> "$GITHUB_STEP_SUMMARY"
