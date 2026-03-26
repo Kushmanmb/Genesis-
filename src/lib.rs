@@ -28,8 +28,17 @@ pub struct SignatureInfo {
 /// Return value of [`verify_text`].
 #[derive(Serialize, Deserialize)]
 pub struct VerifyResult {
-    /// `true` when `text` was found at or after `position` in the requested page.
+    /// `true` when `text` starts exactly at byte offset `position` in the requested page.
     pub substring_matches: bool,
+    /// Digital-signature information for the PDF.
+    pub signature: SignatureInfo,
+}
+
+/// Return value of [`verify_and_extract`].
+#[derive(Serialize, Deserialize)]
+pub struct VerifyAndExtractResult {
+    /// Extracted text content, one entry per detected page/content stream.
+    pub pages: Vec<String>,
     /// Digital-signature information for the PDF.
     pub signature: SignatureInfo,
 }
@@ -60,15 +69,14 @@ pub fn extract_text(pdf_bytes: &[u8]) -> Result<Array, JsValue> {
     Ok(array)
 }
 
-/// Verify whether `text` appears at or after byte offset `position` in the
-/// content of page `page`, and report whether the PDF carries a valid digital
-/// signature.
+/// Verify whether `text` starts exactly at byte offset `position` in the content
+/// of page `page`, and report whether the PDF carries a valid digital signature.
 ///
 /// # Arguments
 /// * `pdf_bytes` – raw bytes of a PDF file.
 /// * `page`      – zero-based page index to inspect.
 /// * `text`      – substring to search for.
-/// * `position`  – byte offset within the page text from which the search starts.
+/// * `position`  – byte offset within the page text where the substring must begin.
 ///
 /// # Returns
 /// A JavaScript object `{ substring_matches: bool, signature: { is_valid: bool } }`.
@@ -77,7 +85,7 @@ pub fn extract_text(pdf_bytes: &[u8]) -> Result<Array, JsValue> {
 /// # Example (JavaScript)
 /// ```js
 /// import { verifyText } from "./pkg/genesis_wasm.js";
-/// const result = verifyText(pdfBytes, 0, "Sample Text", 100);
+/// const result = verifyText(pdfBytes, 0, "Sample Text", 0);
 /// console.log("Text found:", result.substring_matches);
 /// console.log("Signature valid:", result.signature.is_valid);
 /// ```
@@ -92,13 +100,12 @@ pub fn verify_text(
     let page_text = pages.get(page as usize).map(String::as_str).unwrap_or("");
     let pos = position as usize;
 
-    // Search from `position`; fall back to a full-page search when `position`
-    // exceeds the page length.
-    let substring_matches = if pos < page_text.len() {
-        page_text[pos..].contains(text)
-    } else {
-        page_text.contains(text)
-    };
+    // The substring must start exactly at `position`.  If the offset is
+    // out-of-bounds the match is considered unsuccessful.
+    let substring_matches = page_text
+        .get(pos..)
+        .map(|slice| slice.starts_with(text))
+        .unwrap_or(false);
 
     let result = VerifyResult {
         substring_matches,
@@ -107,6 +114,61 @@ pub fn verify_text(
         },
     };
 
+    serde_wasm_bindgen::to_value(&result).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+/// Verify the digital signature of a PDF document and extract the text content
+/// of every page.
+///
+/// # Arguments
+/// * `pdf_bytes` – raw bytes of a PDF file.
+///
+/// # Returns
+/// A JavaScript object `{ pages: string[], signature: { is_valid: bool } }`.
+/// Throws a `JsValue` error string when `pdf_bytes` is not a valid PDF.
+///
+/// # Example (JavaScript)
+/// ```js
+/// import { verifyAndExtract } from "./pkg/genesis_wasm.js";
+/// const result = verifyAndExtract(pdfBytes);
+/// console.log("Pages:", result.pages);
+/// console.log("Signature valid:", result.signature.is_valid);
+/// ```
+#[wasm_bindgen(js_name = verifyAndExtract)]
+pub fn verify_and_extract(pdf_bytes: &[u8]) -> Result<JsValue, JsValue> {
+    let pages = extract_pages(pdf_bytes).map_err(|e| JsValue::from_str(&e))?;
+    let result = VerifyAndExtractResult {
+        pages,
+        signature: SignatureInfo {
+            is_valid: pdf_has_valid_signature(pdf_bytes),
+        },
+    };
+    serde_wasm_bindgen::to_value(&result).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+/// Verify only the digital signature of a PDF document (no text extraction).
+///
+/// # Arguments
+/// * `pdf_bytes` – raw bytes of a PDF file.
+///
+/// # Returns
+/// A JavaScript object `{ is_valid: bool }`.
+/// Throws a `JsValue` error string when `pdf_bytes` is not a valid PDF.
+///
+/// # Example (JavaScript)
+/// ```js
+/// import { verifyPdfSignature } from "./pkg/genesis_wasm.js";
+/// const sig = verifyPdfSignature(pdfBytes);
+/// console.log("Signature valid:", sig.is_valid);
+/// ```
+#[wasm_bindgen(js_name = verifyPdfSignature)]
+pub fn verify_pdf_signature(pdf_bytes: &[u8]) -> Result<JsValue, JsValue> {
+    if !is_pdf(pdf_bytes) {
+        return Err(JsValue::from_str("Not a valid PDF file"));
+    }
+    let result = SignatureInfo {
+        is_valid: pdf_has_valid_signature(pdf_bytes),
+    };
     serde_wasm_bindgen::to_value(&result).map_err(|e| JsValue::from_str(&e.to_string()))
 }
 
@@ -423,31 +485,42 @@ mod tests {
     // --- verify_text helpers ---
 
     #[test]
-    fn test_find_text_at_position_within_bounds() {
+    fn test_find_text_at_exact_offset() {
         let pages = extract_page_texts(SIMPLE_PDF);
         let page_text = &pages[0];
         assert!(page_text.contains("Sample Text"));
-        // Searching from offset 0 should also find it.
-        let pos = 0usize;
-        let found = if pos < page_text.len() {
-            page_text[pos..].contains("Sample Text")
-        } else {
-            page_text.contains("Sample Text")
-        };
+        // Find the exact byte offset at which "Sample Text" starts.
+        let pos = page_text.find("Sample Text").expect("substring not found");
+        let found = page_text
+            .get(pos..)
+            .map(|slice| slice.starts_with("Sample Text"))
+            .unwrap_or(false);
         assert!(found);
     }
 
     #[test]
-    fn test_find_text_position_beyond_length_falls_back_to_full_search() {
+    fn test_find_text_at_wrong_offset_returns_false() {
         let pages = extract_page_texts(SIMPLE_PDF);
         let page_text = &pages[0];
-        let huge_pos = usize::MAX;
-        let found = if huge_pos < page_text.len() {
-            page_text[huge_pos..].contains("Sample Text")
-        } else {
-            page_text.contains("Sample Text")
-        };
-        assert!(found);
+        // Searching from offset 1 (one byte after the actual start) must not match.
+        let pos = page_text.find("Sample Text").expect("substring not found") + 1;
+        let found = page_text
+            .get(pos..)
+            .map(|slice| slice.starts_with("Sample Text"))
+            .unwrap_or(false);
+        assert!(!found);
+    }
+
+    #[test]
+    fn test_find_text_position_beyond_length_returns_false() {
+        let pages = extract_page_texts(SIMPLE_PDF);
+        let page_text = &pages[0];
+        // An out-of-bounds offset must return false (no fallback to full-page search).
+        let found = page_text
+            .get(usize::MAX..)
+            .map(|slice| slice.starts_with("Sample Text"))
+            .unwrap_or(false);
+        assert!(!found);
     }
 
     // --- pdf_has_valid_signature ---
@@ -551,5 +624,53 @@ mod tests {
     #[test]
     fn test_extract_text_operators_empty_stream() {
         assert_eq!(extract_text_operators(b""), "");
+    }
+
+    // --- verify_and_extract ---
+
+    #[test]
+    fn test_verify_and_extract_returns_pages_and_signature() {
+        let pages = extract_pages(SIMPLE_PDF).unwrap();
+        assert!(!pages.is_empty());
+        let is_signed = pdf_has_valid_signature(SIMPLE_PDF);
+        assert!(!is_signed); // SIMPLE_PDF has no signature
+    }
+
+    #[test]
+    fn test_verify_and_extract_detects_signed_pdf() {
+        let pages = extract_pages(SIGNED_PDF).unwrap();
+        assert!(!pages.is_empty());
+        let is_signed = pdf_has_valid_signature(SIGNED_PDF);
+        assert!(is_signed);
+    }
+
+    #[test]
+    fn test_verify_and_extract_rejects_non_pdf() {
+        assert!(extract_pages(b"not a pdf").is_err());
+    }
+
+    // --- verify_pdf_signature ---
+
+    #[test]
+    fn test_verify_pdf_signature_rejects_non_pdf() {
+        assert!(!is_pdf(b"not a pdf"));
+    }
+
+    #[test]
+    fn test_verify_pdf_signature_returns_false_for_unsigned_pdf() {
+        assert!(is_pdf(SIMPLE_PDF));
+        assert!(!pdf_has_valid_signature(SIMPLE_PDF));
+    }
+
+    #[test]
+    fn test_verify_pdf_signature_returns_true_for_signed_pdf() {
+        assert!(is_pdf(SIGNED_PDF));
+        assert!(pdf_has_valid_signature(SIGNED_PDF));
+    }
+
+    #[test]
+    fn test_verify_pdf_signature_returns_true_for_compact_signed_pdf() {
+        assert!(is_pdf(SIGNED_PDF_COMPACT));
+        assert!(pdf_has_valid_signature(SIGNED_PDF_COMPACT));
     }
 }
