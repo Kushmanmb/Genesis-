@@ -18,6 +18,9 @@ inline constexpr std::string_view FACEBOOK_PROFILE = "https://www.facebook.com/K
 // Coinbase ID associated with the owner of this blockchain.
 inline constexpr std::string_view COINBASE_ID = "kushman.cb.id";
 
+// Phone number associated with the owner of this blockchain.
+inline constexpr std::string_view PHONE_NUMBER = "18542123378";
+
 // Returns true when `address` matches one of the configured owner addresses
 // (case-sensitive, as Ethereum checksummed addresses are case-sensitive).
 inline bool isOwner(const std::string &address) {
