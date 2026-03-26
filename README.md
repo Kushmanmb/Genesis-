@@ -43,6 +43,7 @@ Block #2
 - `returnToLegacy(callerAddress, legacyAddress)` — consolidates all mytoken balances held by owner addresses and records a block transferring them to the specified legacy address; `callerAddress` must be an authorised owner.
 - `returnToOwner(callerAddress)` — consolidates all mytoken balances held by owner addresses and records a block transferring them back to `callerAddress`; `callerAddress` must be an authorised owner.
 - `consolidateBalances(callerAddress)` — consolidates all mytoken balances held by owner addresses into a single chain record without routing them to a specific destination; `callerAddress` must be an authorised owner.
+- `announce(message, callerAddress)` — records "Announcement: <message>" as a block on the chain; `callerAddress` must be an authorised owner.
 - `fetchAll()` — returns a const reference to the full vector of blocks.
 - `fetchAllFrom(identifier)` — returns a copy of all blocks whose data field contains `identifier`.
 - `validateSocialProfile()` — records the owner's `SOCIAL_PROFILE` URL (`https://github.com/ghost`) as a block on the chain and returns `true` once the profile is confirmed to be present in the chain.

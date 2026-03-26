@@ -142,3 +142,8 @@ bool Blockchain::validateSocialProfile() {
     addBlockInternal(std::string(SOCIAL_PROFILE));
     return true;
 }
+
+void Blockchain::announce(const std::string &message, const std::string &callerAddress) {
+    requireOwner(callerAddress);
+    addBlockInternal("Announcement: " + message);
+}

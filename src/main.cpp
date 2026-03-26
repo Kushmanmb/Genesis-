@@ -80,6 +80,14 @@ int main() {
     std::cout << "\nSocial profile validated on chain: " << (validated ? "yes" : "no") << "\n";
     std::cout << "Profile: " << SOCIAL_PROFILE << "\n";
 
+    // Demonstrate announce: owner-gated operations are rejected when OWNER_ADDRESSES
+    // is empty, but the error path is shown here.
+    try {
+        bc.announce("Genesis blockchain is now live!", "0x0000000000000000000000000000000000000000");
+    } catch (const std::runtime_error &e) {
+        std::cerr << "Caught expected error (announce): " << e.what() << "\n";
+    }
+
     std::cout << "=== All Blocks ===\n";
     for (const Block &b : bc.fetchAll()) {
         std::cout << b.toString();
