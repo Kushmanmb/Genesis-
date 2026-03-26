@@ -734,3 +734,55 @@ TEST(NodeTest, ParseEthBalanceResponseKnownAddress) {
         R"({"status":"1","message":"OK","result":"663046288842860073"})";
     EXPECT_EQ(Node::parseEthBalanceResponse(response), "663046288842860073");
 }
+
+// ---- Node::parseTokenSupplyResponse tests ------------------------------
+
+TEST(NodeTest, ParseTokenSupplyResponseTypical) {
+    // Typical Etherscan token supply response.
+    const std::string response =
+        R"({"status":"1","message":"OK","result":"21265524714464496430135228"})";
+    EXPECT_EQ(Node::parseTokenSupplyResponse(response), "21265524714464496430135228");
+}
+
+TEST(NodeTest, ParseTokenSupplyResponseZeroSupply) {
+    const std::string response =
+        R"({"status":"1","message":"OK","result":"0"})";
+    EXPECT_EQ(Node::parseTokenSupplyResponse(response), "0");
+}
+
+TEST(NodeTest, ParseTokenSupplyResponseLargeSupply) {
+    // Very large token supply (more than uint64_t max) represented as decimal string.
+    const std::string response =
+        R"({"status":"1","message":"OK","result":"1000000000000000000000000000000"})";
+    EXPECT_EQ(Node::parseTokenSupplyResponse(response), "1000000000000000000000000000000");
+}
+
+TEST(NodeTest, ParseTokenSupplyResponseMissingResultThrows) {
+    const std::string response =
+        R"({"status":"0","message":"NOTOK","error":"Invalid contract address format"})";
+    EXPECT_THROW(static_cast<void>(Node::parseTokenSupplyResponse(response)), std::runtime_error);
+}
+
+TEST(NodeTest, ParseTokenSupplyResponseEmptyStringThrows) {
+    EXPECT_THROW(static_cast<void>(Node::parseTokenSupplyResponse("")), std::runtime_error);
+}
+
+TEST(NodeTest, ParseTokenSupplyResponseEmptyResultValueThrows) {
+    // The "result" key is present but its value is an empty string.
+    const std::string response =
+        R"({"status":"1","message":"OK","result":""})";
+    EXPECT_THROW(static_cast<void>(Node::parseTokenSupplyResponse(response)), std::runtime_error);
+}
+
+TEST(NodeTest, ParseTokenSupplyResponseUnterminatedResultThrows) {
+    // The closing quote after the result value is missing.
+    const std::string response = R"({"status":"1","message":"OK","result":"12345)";
+    EXPECT_THROW(static_cast<void>(Node::parseTokenSupplyResponse(response)), std::runtime_error);
+}
+
+TEST(NodeTest, ParseTokenSupplyResponseKnownContract) {
+    // Simulated response for contract 0x57d90b64a1a57749b0f932f1a3395792e12e7055.
+    const std::string response =
+        R"({"status":"1","message":"OK","result":"21265524714464496430135228"})";
+    EXPECT_EQ(Node::parseTokenSupplyResponse(response), "21265524714464496430135228");
+}

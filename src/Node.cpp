@@ -182,3 +182,61 @@ std::string Node::parseEthBalanceResponse(const std::string &response) {
 
     return balance;
 }
+
+std::string Node::fetchTokenSupply(const std::string &contractAddress,
+                                   const std::string &apiKey) {
+    const std::string url =
+        "https://api.etherscan.io/v2/api"
+        "?chainid=1&module=stats&action=tokensupply&contractaddress=" + contractAddress +
+        "&apikey=" + apiKey;
+
+    // RAII wrapper ensures curl_easy_cleanup is called even if an exception is thrown.
+    std::unique_ptr<CURL, decltype(&curl_easy_cleanup)> curl(
+        curl_easy_init(), curl_easy_cleanup);
+    if (!curl) {
+        throw std::runtime_error("fetchTokenSupply: failed to initialize libcurl");
+    }
+
+    std::string response;
+    curl_easy_setopt(curl.get(), CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, curlWriteCallback);
+    curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &response);
+    curl_easy_setopt(curl.get(), CURLOPT_FOLLOWLOCATION, 1L);
+    curl_easy_setopt(curl.get(), CURLOPT_TIMEOUT, 10L);
+
+    const CURLcode res = curl_easy_perform(curl.get());
+
+    if (res != CURLE_OK) {
+        throw std::runtime_error(
+            std::string("fetchTokenSupply: HTTP request failed: ") +
+            curl_easy_strerror(res));
+    }
+
+    LOG_DEBUG("fetchTokenSupply response=" + response);
+    return parseTokenSupplyResponse(response);
+}
+
+std::string Node::parseTokenSupplyResponse(const std::string &response) {
+    // Expected: {"status":"1","message":"OK","result":"<decimal>"}
+    const std::string resultKey = "\"result\":\"";
+    const auto keyPos = response.find(resultKey);
+    if (keyPos == std::string::npos) {
+        throw std::runtime_error(
+            "parseTokenSupplyResponse: missing \"result\" field in response: " + response);
+    }
+
+    const auto valStart = keyPos + resultKey.size();
+    const auto valEnd   = response.find('"', valStart);
+    if (valEnd == std::string::npos) {
+        throw std::runtime_error(
+            "parseTokenSupplyResponse: malformed response (unterminated result): " + response);
+    }
+
+    const std::string supply = response.substr(valStart, valEnd - valStart);
+    if (supply.empty()) {
+        throw std::runtime_error(
+            "parseTokenSupplyResponse: empty result value in response: " + response);
+    }
+
+    return supply;
+}

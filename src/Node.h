@@ -67,6 +67,20 @@ public:
     // the result value is empty.
     [[nodiscard]] static std::string parseEthBalanceResponse(const std::string &response);
 
+    // Query the Etherscan v2 API for the total supply of an ERC-20 token on Ethereum mainnet.
+    // Performs an HTTP GET to:
+    //   https://api.etherscan.io/v2/api?chainid=1&module=stats&action=tokensupply&contractaddress=<contractAddress>&apikey=<apiKey>
+    // Returns the token supply as a decimal string.
+    // Throws std::runtime_error on network failure or an unexpected response.
+    [[nodiscard]] static std::string fetchTokenSupply(const std::string &contractAddress,
+                                                      const std::string &apiKey);
+
+    // Parse an Etherscan token supply JSON response and return the supply as a decimal string.
+    // Expected format: {"status":"1","message":"OK","result":"<decimal>"}
+    // Throws std::runtime_error if the response is missing the "result" field or
+    // the result value is empty.
+    [[nodiscard]] static std::string parseTokenSupplyResponse(const std::string &response);
+
 private:
     Blockchain blockchain;
     bool       running;
