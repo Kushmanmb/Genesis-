@@ -15,7 +15,8 @@ Blockchain::Blockchain() {
 
 void Blockchain::requireOwner(const std::string &callerAddress) const {
     if (!isOwner(callerAddress)) {
-        throw std::runtime_error("Permission denied: caller is not authorised");
+        throw std::runtime_error(
+            "Permission denied: caller '" + callerAddress + "' is not authorised");
     }
 }
 
@@ -30,56 +31,36 @@ void Blockchain::addBlock(const std::string &data, const std::string &callerAddr
 
 void Blockchain::returnToOrigin(const std::string &callerAddress) {
     requireOwner(callerAddress);
-
-    std::ostringstream oss;
-    oss << "Return tokens to origin (" << ORIGIN_ADDRESS << "):";
-    for (const auto &addr : OWNER_ADDRESSES) {
-        oss << " [" << addr << "]";
-    }
-    addBlockInternal(oss.str());
+    addBlockInternal("Return tokens to origin (" + ORIGIN_ADDRESS + "):" +
+                     ownerAddressList());
 }
 
 void Blockchain::returnToLegacy(const std::string &callerAddress,
                                 const std::string &legacyAddress) {
     requireOwner(callerAddress);
-
-    std::ostringstream oss;
-    oss << "Consolidate mytoken balances and return to legacy address ("
-        << legacyAddress << "):";
-    for (const auto &addr : OWNER_ADDRESSES) {
-        oss << " [" << addr << "]";
-    }
-    addBlockInternal(oss.str());
+    addBlockInternal(
+        "Consolidate mytoken balances and return to legacy address (" +
+        legacyAddress + "):" + ownerAddressList());
 }
 
 void Blockchain::returnToOwner(const std::string &callerAddress) {
     requireOwner(callerAddress);
-
-    std::ostringstream oss;
-    oss << "Consolidate mytoken balances and return to owner (" << callerAddress << "):";
-    for (const auto &addr : OWNER_ADDRESSES) {
-        oss << " [" << addr << "]";
-    }
-    addBlockInternal(oss.str());
+    addBlockInternal(
+        "Consolidate mytoken balances and return to owner (" +
+        callerAddress + "):" + ownerAddressList());
 }
 
 void Blockchain::consolidateBalances(const std::string &callerAddress) {
     requireOwner(callerAddress);
-
-    std::ostringstream oss;
-    oss << "Consolidate token balances:";
-    for (const auto &addr : OWNER_ADDRESSES) {
-        oss << " [" << addr << "]";
-    }
-    addBlockInternal(oss.str());
+    addBlockInternal("Consolidate token balances:" + ownerAddressList());
 }
 
-std::string Blockchain::chkpotpie(uint32_t fromIndex, uint32_t toIndex) const {
+std::string Blockchain::computeRangeChecksum(uint32_t fromIndex, uint32_t toIndex) const {
     if (fromIndex > toIndex) {
-        throw std::out_of_range("chkpotpie: fromIndex must not exceed toIndex");
+        throw std::out_of_range("computeRangeChecksum: fromIndex must not exceed toIndex");
     }
     if (toIndex >= static_cast<uint32_t>(chain.size())) {
-        throw std::out_of_range("chkpotpie: toIndex is out of bounds");
+        throw std::out_of_range("computeRangeChecksum: toIndex is out of bounds");
     }
     std::string combined;
     for (uint32_t i = fromIndex; i <= toIndex; ++i) {
@@ -140,10 +121,18 @@ Blockchain::getTrending(std::size_t topN) const {
 
 bool Blockchain::validateSocialProfile() {
     addBlockInternal(std::string(SOCIAL_PROFILE));
-    return true;
+    return !fetchAllFrom(std::string(SOCIAL_PROFILE)).empty();
 }
 
 void Blockchain::announce(const std::string &message, const std::string &callerAddress) {
     requireOwner(callerAddress);
     addBlockInternal("Announcement: " + message);
+}
+
+std::string Blockchain::ownerAddressList() {
+    std::ostringstream oss;
+    for (const auto &addr : OWNER_ADDRESSES) {
+        oss << " [" << addr << "]";
+    }
+    return oss.str();
 }

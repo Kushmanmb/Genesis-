@@ -19,7 +19,7 @@ public:
     void stop();
 
     // Returns true while the node has been started and not yet stopped.
-    bool isRunning() const;
+    [[nodiscard]] bool isRunning() const;
 
     // Delegate to Blockchain::addBlock (owner-authenticated).
     // Throws std::runtime_error if the node is not running.
@@ -27,7 +27,7 @@ public:
 
     // Record the owner's social profile on the underlying chain and return true
     // if it is confirmed.  Throws std::runtime_error if the node is not running.
-    bool validateSocialProfile();
+    [[nodiscard]] bool validateSocialProfile();
 
     // Broadcast an announcement by recording "Announcement: <message>" as a block
     // on the chain.  callerAddress must be an authorised owner.
@@ -36,7 +36,7 @@ public:
 
     // Read-only access to the underlying chain.
     // Throws std::runtime_error if the node is not running.
-    const std::vector<Block> &fetchAll() const;
+    [[nodiscard]] const std::vector<Block> &fetchAll() const;
 
 private:
     Blockchain blockchain;
