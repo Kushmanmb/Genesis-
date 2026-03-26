@@ -36,3 +36,10 @@ bool Node::validateSocialProfile() {
     }
     return blockchain.validateSocialProfile();
 }
+
+void Node::announce(const std::string &message, const std::string &callerAddress) {
+    if (!running) {
+        throw std::runtime_error("Node is not running");
+    }
+    blockchain.announce(message, callerAddress);
+}

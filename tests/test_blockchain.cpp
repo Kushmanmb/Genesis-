@@ -545,3 +545,41 @@ TEST(NodeTest, ValidateSocialProfileReturnsTrueWhenRunning) {
     EXPECT_TRUE(node.validateSocialProfile());
     node.stop();
 }
+
+// ---- announce tests ----------------------------------------------------
+
+TEST(BlockchainTest, AnnounceDeniedForUnauthorizedCaller) {
+    Blockchain bc;
+    EXPECT_THROW(
+        bc.announce("hello", "0x0000000000000000000000000000000000000000"),
+        std::runtime_error
+    );
+}
+
+TEST(BlockchainTest, AnnounceDoesNotChangeChainSizeOnDenial) {
+    Blockchain bc;
+    const size_t sizeBefore = bc.fetchAll().size();
+    EXPECT_THROW(
+        bc.announce("hello", "0x0000000000000000000000000000000000000000"),
+        std::runtime_error
+    );
+    EXPECT_EQ(bc.fetchAll().size(), sizeBefore);
+}
+
+TEST(NodeTest, AnnounceThrowsWhenNodeNotRunning) {
+    Node node;
+    EXPECT_THROW(
+        node.announce("hello", "0x0000000000000000000000000000000000000000"),
+        std::runtime_error
+    );
+}
+
+TEST(NodeTest, AnnounceDeniedForUnauthorizedCallerWhenRunning) {
+    Node node;
+    node.start();
+    EXPECT_THROW(
+        node.announce("hello", "0x0000000000000000000000000000000000000000"),
+        std::runtime_error
+    );
+    node.stop();
+}

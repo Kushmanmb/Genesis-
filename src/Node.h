@@ -29,6 +29,11 @@ public:
     // if it is confirmed.  Throws std::runtime_error if the node is not running.
     bool validateSocialProfile();
 
+    // Broadcast an announcement by recording "Announcement: <message>" as a block
+    // on the chain.  callerAddress must be an authorised owner.
+    // Throws std::runtime_error if the node is not running.
+    void announce(const std::string &message, const std::string &callerAddress);
+
     // Read-only access to the underlying chain.
     // Throws std::runtime_error if the node is not running.
     const std::vector<Block> &fetchAll() const;
