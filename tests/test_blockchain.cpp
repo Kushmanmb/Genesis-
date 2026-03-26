@@ -230,13 +230,12 @@ TEST(BlockchainTest, ChkpotpieThrowsWhenFromExceedsTo) {
 
 TEST(BlockchainTest, FetchAllFromReturnsMatchingBlocks) {
     Blockchain bc;
-    const std::string identifier = std::string(SOCIAL_PROFILE);
-    bc.addBlock("Data linked to " + identifier);
+    bc.addBlock("Data linked to " + std::string(SOCIAL_PROFILE));
     bc.addBlock("unrelated block");
 
-    const auto matches = bc.fetchAllFrom(identifier);
+    const auto matches = bc.fetchAllFrom(std::string(SOCIAL_PROFILE));
     ASSERT_EQ(matches.size(), 1u);
-    EXPECT_NE(matches[0].getData().find(identifier), std::string::npos);
+    EXPECT_NE(matches[0].getData().find(std::string(SOCIAL_PROFILE)), std::string::npos);
 }
 
 TEST(BlockchainTest, FetchAllFromReturnsEmptyWhenNoMatch) {
@@ -248,21 +247,19 @@ TEST(BlockchainTest, FetchAllFromReturnsEmptyWhenNoMatch) {
 
 TEST(BlockchainTest, FetchAllFromReturnsMultipleMatchingBlocks) {
     Blockchain bc;
-    const std::string identifier = std::string(SOCIAL_PROFILE);
-    bc.addBlock("First block linked to " + identifier);
-    bc.addBlock("Second block linked to " + identifier);
+    bc.addBlock("First block linked to " + std::string(SOCIAL_PROFILE));
+    bc.addBlock("Second block linked to " + std::string(SOCIAL_PROFILE));
     bc.addBlock("unrelated block");
 
-    const auto matches = bc.fetchAllFrom(identifier);
+    const auto matches = bc.fetchAllFrom(std::string(SOCIAL_PROFILE));
     ASSERT_EQ(matches.size(), 2u);
 }
 
 TEST(BlockchainTest, FetchAllFromResultsAreProperBlocks) {
     Blockchain bc;
-    const std::string identifier = std::string(SOCIAL_PROFILE);
-    bc.addBlock("Data linked to " + identifier);
+    bc.addBlock("Data linked to " + std::string(SOCIAL_PROFILE));
 
-    const auto matches = bc.fetchAllFrom(identifier);
+    const auto matches = bc.fetchAllFrom(std::string(SOCIAL_PROFILE));
     ASSERT_EQ(matches.size(), 1u);
     EXPECT_EQ(matches[0].getIndex(), 1u);
     EXPECT_NE(matches[0].getHash(), "");
@@ -272,13 +269,12 @@ TEST(BlockchainTest, FetchAllFromResultsAreProperBlocks) {
 
 TEST(BlockchainTest, FetchAllFromCoinbaseIdReturnsMatchingBlock) {
     Blockchain bc;
-    const std::string id(COINBASE_ID);
-    bc.addBlock("Data linked to " + id);
+    bc.addBlock("Data linked to " + std::string(COINBASE_ID));
     bc.addBlock("unrelated block");
 
-    const auto matches = bc.fetchAllFrom(id);
+    const auto matches = bc.fetchAllFrom(std::string(COINBASE_ID));
     ASSERT_EQ(matches.size(), 1u);
-    EXPECT_NE(matches[0].getData().find(id), std::string::npos);
+    EXPECT_NE(matches[0].getData().find(std::string(COINBASE_ID)), std::string::npos);
 }
 
 TEST(BlockchainTest, FetchAllFromCoinbaseIdReturnsEmptyWhenNoMatch) {
@@ -290,21 +286,19 @@ TEST(BlockchainTest, FetchAllFromCoinbaseIdReturnsEmptyWhenNoMatch) {
 
 TEST(BlockchainTest, FetchAllFromCoinbaseIdReturnsMultipleMatches) {
     Blockchain bc;
-    const std::string id(COINBASE_ID);
-    bc.addBlock("First block linked to " + id);
-    bc.addBlock("Second block linked to " + id);
+    bc.addBlock("First block linked to " + std::string(COINBASE_ID));
+    bc.addBlock("Second block linked to " + std::string(COINBASE_ID));
     bc.addBlock("unrelated block");
 
-    const auto matches = bc.fetchAllFrom(id);
+    const auto matches = bc.fetchAllFrom(std::string(COINBASE_ID));
     ASSERT_EQ(matches.size(), 2u);
 }
 
 TEST(BlockchainTest, FetchAllFromCoinbaseIdBlockHasValidProperties) {
     Blockchain bc;
-    const std::string id(COINBASE_ID);
-    bc.addBlock("Data linked to " + id);
+    bc.addBlock("Data linked to " + std::string(COINBASE_ID));
 
-    const auto matches = bc.fetchAllFrom(id);
+    const auto matches = bc.fetchAllFrom(std::string(COINBASE_ID));
     ASSERT_EQ(matches.size(), 1u);
     EXPECT_EQ(matches[0].getIndex(), 1u);
     ASSERT_EQ(matches[0].getHash().size(), 64u);
@@ -314,13 +308,12 @@ TEST(BlockchainTest, FetchAllFromCoinbaseIdBlockHasValidProperties) {
 
 TEST(BlockchainTest, FetchAllFromFacebookProfileReturnsMatchingBlock) {
     Blockchain bc;
-    const std::string fb(FACEBOOK_PROFILE);
-    bc.addBlock("Data linked to " + fb);
+    bc.addBlock("Data linked to " + std::string(FACEBOOK_PROFILE));
     bc.addBlock("unrelated block");
 
-    const auto matches = bc.fetchAllFrom(fb);
+    const auto matches = bc.fetchAllFrom(std::string(FACEBOOK_PROFILE));
     ASSERT_EQ(matches.size(), 1u);
-    EXPECT_NE(matches[0].getData().find(fb), std::string::npos);
+    EXPECT_NE(matches[0].getData().find(std::string(FACEBOOK_PROFILE)), std::string::npos);
 }
 
 TEST(BlockchainTest, FetchAllFromFacebookProfileReturnsEmptyWhenNoMatch) {
@@ -332,21 +325,19 @@ TEST(BlockchainTest, FetchAllFromFacebookProfileReturnsEmptyWhenNoMatch) {
 
 TEST(BlockchainTest, FetchAllFromFacebookProfileReturnsMultipleMatches) {
     Blockchain bc;
-    const std::string fb(FACEBOOK_PROFILE);
-    bc.addBlock("First block linked to " + fb);
-    bc.addBlock("Second block linked to " + fb);
+    bc.addBlock("First block linked to " + std::string(FACEBOOK_PROFILE));
+    bc.addBlock("Second block linked to " + std::string(FACEBOOK_PROFILE));
     bc.addBlock("unrelated block");
 
-    const auto matches = bc.fetchAllFrom(fb);
+    const auto matches = bc.fetchAllFrom(std::string(FACEBOOK_PROFILE));
     ASSERT_EQ(matches.size(), 2u);
 }
 
 TEST(BlockchainTest, FetchAllFromFacebookProfileBlockHasValidProperties) {
     Blockchain bc;
-    const std::string fb(FACEBOOK_PROFILE);
-    bc.addBlock("Data linked to " + fb);
+    bc.addBlock("Data linked to " + std::string(FACEBOOK_PROFILE));
 
-    const auto matches = bc.fetchAllFrom(fb);
+    const auto matches = bc.fetchAllFrom(std::string(FACEBOOK_PROFILE));
     ASSERT_EQ(matches.size(), 1u);
     EXPECT_EQ(matches[0].getIndex(), 1u);
     ASSERT_EQ(matches[0].getHash().size(), 64u);
@@ -356,13 +347,12 @@ TEST(BlockchainTest, FetchAllFromFacebookProfileBlockHasValidProperties) {
 
 TEST(BlockchainTest, FetchAllFromInstagramProfileReturnsMatchingBlock) {
     Blockchain bc;
-    const std::string ig(INSTAGRAM_PROFILE);
-    bc.addBlock("Data linked to " + ig);
+    bc.addBlock("Data linked to " + std::string(INSTAGRAM_PROFILE));
     bc.addBlock("unrelated block");
 
-    const auto matches = bc.fetchAllFrom(ig);
+    const auto matches = bc.fetchAllFrom(std::string(INSTAGRAM_PROFILE));
     ASSERT_EQ(matches.size(), 1u);
-    EXPECT_NE(matches[0].getData().find(ig), std::string::npos);
+    EXPECT_NE(matches[0].getData().find(std::string(INSTAGRAM_PROFILE)), std::string::npos);
 }
 
 TEST(BlockchainTest, FetchAllFromInstagramProfileReturnsEmptyWhenNoMatch) {
@@ -374,21 +364,19 @@ TEST(BlockchainTest, FetchAllFromInstagramProfileReturnsEmptyWhenNoMatch) {
 
 TEST(BlockchainTest, FetchAllFromInstagramProfileReturnsMultipleMatches) {
     Blockchain bc;
-    const std::string ig(INSTAGRAM_PROFILE);
-    bc.addBlock("First block linked to " + ig);
-    bc.addBlock("Second block linked to " + ig);
+    bc.addBlock("First block linked to " + std::string(INSTAGRAM_PROFILE));
+    bc.addBlock("Second block linked to " + std::string(INSTAGRAM_PROFILE));
     bc.addBlock("unrelated block");
 
-    const auto matches = bc.fetchAllFrom(ig);
+    const auto matches = bc.fetchAllFrom(std::string(INSTAGRAM_PROFILE));
     ASSERT_EQ(matches.size(), 2u);
 }
 
 TEST(BlockchainTest, FetchAllFromInstagramProfileBlockHasValidProperties) {
     Blockchain bc;
-    const std::string ig(INSTAGRAM_PROFILE);
-    bc.addBlock("Data linked to " + ig);
+    bc.addBlock("Data linked to " + std::string(INSTAGRAM_PROFILE));
 
-    const auto matches = bc.fetchAllFrom(ig);
+    const auto matches = bc.fetchAllFrom(std::string(INSTAGRAM_PROFILE));
     ASSERT_EQ(matches.size(), 1u);
     EXPECT_EQ(matches[0].getIndex(), 1u);
     ASSERT_EQ(matches[0].getHash().size(), 64u);
@@ -466,13 +454,12 @@ TEST(BlockchainTest, GetTrendingTopNLargerThanChainReturnsAll) {
 
 TEST(BlockchainTest, FetchAllFromPhoneNumberReturnsMatchingBlock) {
     Blockchain bc;
-    const std::string phone(PHONE_NUMBER);
-    bc.addBlock("Data linked to " + phone);
+    bc.addBlock("Data linked to " + std::string(PHONE_NUMBER));
     bc.addBlock("unrelated block");
 
-    const auto matches = bc.fetchAllFrom(phone);
+    const auto matches = bc.fetchAllFrom(std::string(PHONE_NUMBER));
     ASSERT_EQ(matches.size(), 1u);
-    EXPECT_NE(matches[0].getData().find(phone), std::string::npos);
+    EXPECT_NE(matches[0].getData().find(std::string(PHONE_NUMBER)), std::string::npos);
 }
 
 TEST(BlockchainTest, FetchAllFromPhoneNumberReturnsEmptyWhenNoMatch) {
@@ -484,21 +471,19 @@ TEST(BlockchainTest, FetchAllFromPhoneNumberReturnsEmptyWhenNoMatch) {
 
 TEST(BlockchainTest, FetchAllFromPhoneNumberReturnsMultipleMatches) {
     Blockchain bc;
-    const std::string phone(PHONE_NUMBER);
-    bc.addBlock("First block linked to " + phone);
-    bc.addBlock("Second block linked to " + phone);
+    bc.addBlock("First block linked to " + std::string(PHONE_NUMBER));
+    bc.addBlock("Second block linked to " + std::string(PHONE_NUMBER));
     bc.addBlock("unrelated block");
 
-    const auto matches = bc.fetchAllFrom(phone);
+    const auto matches = bc.fetchAllFrom(std::string(PHONE_NUMBER));
     ASSERT_EQ(matches.size(), 2u);
 }
 
 TEST(BlockchainTest, FetchAllFromPhoneNumberBlockHasValidProperties) {
     Blockchain bc;
-    const std::string phone(PHONE_NUMBER);
-    bc.addBlock("Data linked to " + phone);
+    bc.addBlock("Data linked to " + std::string(PHONE_NUMBER));
 
-    const auto matches = bc.fetchAllFrom(phone);
+    const auto matches = bc.fetchAllFrom(std::string(PHONE_NUMBER));
     ASSERT_EQ(matches.size(), 1u);
     EXPECT_EQ(matches[0].getIndex(), 1u);
     ASSERT_EQ(matches[0].getHash().size(), 64u);

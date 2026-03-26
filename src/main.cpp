@@ -46,32 +46,28 @@ int main() {
     // Demonstrate fetchAllFrom: add blocks referencing the owner's social profile,
     // Facebook profile, Coinbase ID, and phone number, then fetch all blocks that
     // contain each identifier.
-    const std::string socialProfile(SOCIAL_PROFILE);
-    const std::string facebookProfile(FACEBOOK_PROFILE);
-    const std::string coinbaseId(COINBASE_ID);
-    const std::string phoneNumber(PHONE_NUMBER);
-    bc.addBlock("Data linked to " + socialProfile);
-    bc.addBlock("Data linked to " + facebookProfile);
-    bc.addBlock("Data linked to " + coinbaseId);
-    bc.addBlock("Data linked to " + phoneNumber);
+    bc.addBlock("Data linked to " + std::string(SOCIAL_PROFILE));
+    bc.addBlock("Data linked to " + std::string(FACEBOOK_PROFILE));
+    bc.addBlock("Data linked to " + std::string(COINBASE_ID));
+    bc.addBlock("Data linked to " + std::string(PHONE_NUMBER));
 
-    std::cout << "\n=== Blocks referencing " << socialProfile << " ===\n";
-    for (const Block &b : bc.fetchAllFrom(socialProfile)) {
+    std::cout << "\n=== Blocks referencing " << SOCIAL_PROFILE << " ===\n";
+    for (const Block &b : bc.fetchAllFrom(std::string(SOCIAL_PROFILE))) {
         std::cout << b.toString();
     }
 
-    std::cout << "\n=== Blocks referencing " << facebookProfile << " ===\n";
-    for (const Block &b : bc.fetchAllFrom(facebookProfile)) {
+    std::cout << "\n=== Blocks referencing " << FACEBOOK_PROFILE << " ===\n";
+    for (const Block &b : bc.fetchAllFrom(std::string(FACEBOOK_PROFILE))) {
         std::cout << b.toString();
     }
 
-    std::cout << "\n=== Blocks referencing " << coinbaseId << " ===\n";
-    for (const Block &b : bc.fetchAllFrom(coinbaseId)) {
+    std::cout << "\n=== Blocks referencing " << COINBASE_ID << " ===\n";
+    for (const Block &b : bc.fetchAllFrom(std::string(COINBASE_ID))) {
         std::cout << b.toString();
     }
 
-    std::cout << "\n=== Blocks referencing " << phoneNumber << " ===\n";
-    for (const Block &b : bc.fetchAllFrom(phoneNumber)) {
+    std::cout << "\n=== Blocks referencing " << PHONE_NUMBER << " ===\n";
+    for (const Block &b : bc.fetchAllFrom(std::string(PHONE_NUMBER))) {
         std::cout << b.toString();
     }
 
@@ -95,8 +91,8 @@ int main() {
 
     // Demonstrate getTrending: add several blocks referencing the social profile
     // multiple times so that it rises to the top of the trending list.
-    bc.addBlock("Data linked to " + socialProfile);
-    bc.addBlock("Data linked to " + socialProfile);
+    bc.addBlock("Data linked to " + std::string(SOCIAL_PROFILE));
+    bc.addBlock("Data linked to " + std::string(SOCIAL_PROFILE));
 
     std::cout << "\n=== Top 3 Trending Block Data ===\n";
     for (const auto &entry : bc.getTrending(3)) {
