@@ -52,6 +52,21 @@ public:
     // contains a malformed hex value.
     [[nodiscard]] static uint64_t parseEthBlockNumberResponse(const std::string &response);
 
+    // Query the Etherscan v2 API for the ETH balance of an address on Ethereum mainnet.
+    // Performs an HTTP GET to:
+    //   https://api.etherscan.io/v2/api?chainid=1&module=account&action=balance&address=<address>&tag=latest&apikey=<apiKey>
+    // Returns the balance as a decimal string (in wei).
+    // Throws std::runtime_error on network failure or an unexpected response.
+    [[nodiscard]] static std::string fetchEthBalance(const std::string &address,
+                                                     const std::string &apiKey);
+
+    // Parse an Etherscan account balance JSON response and return the balance (in wei)
+    // as a decimal string.
+    // Expected format: {"status":"1","message":"OK","result":"<decimal>"}
+    // Throws std::runtime_error if the response is missing the "result" field or
+    // the result value is empty.
+    [[nodiscard]] static std::string parseEthBalanceResponse(const std::string &response);
+
 private:
     Blockchain blockchain;
     bool       running;

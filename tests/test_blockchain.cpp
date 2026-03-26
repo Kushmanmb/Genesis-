@@ -682,3 +682,55 @@ TEST(NodeTest, ParseEthBlockNumberResponseKnownBlock) {
         R"({"jsonrpc":"2.0","id":83,"result":"0x1798f7b"})";
     EXPECT_EQ(Node::parseEthBlockNumberResponse(response), 0x1798f7bULL);
 }
+
+// ---- Node::parseEthBalanceResponse tests -------------------------------
+
+TEST(NodeTest, ParseEthBalanceResponseTypical) {
+    // Typical Etherscan account balance response.
+    const std::string response =
+        R"({"status":"1","message":"OK","result":"5571626000000000"})";
+    EXPECT_EQ(Node::parseEthBalanceResponse(response), "5571626000000000");
+}
+
+TEST(NodeTest, ParseEthBalanceResponseZeroBalance) {
+    const std::string response =
+        R"({"status":"1","message":"OK","result":"0"})";
+    EXPECT_EQ(Node::parseEthBalanceResponse(response), "0");
+}
+
+TEST(NodeTest, ParseEthBalanceResponseLargeBalance) {
+    // Large balance (greater than uint64_t max) represented as decimal string.
+    const std::string response =
+        R"({"status":"1","message":"OK","result":"120000000000000000000000000"})";
+    EXPECT_EQ(Node::parseEthBalanceResponse(response), "120000000000000000000000000");
+}
+
+TEST(NodeTest, ParseEthBalanceResponseMissingResultThrows) {
+    const std::string response =
+        R"({"status":"0","message":"NOTOK","error":"Invalid address format"})";
+    EXPECT_THROW(static_cast<void>(Node::parseEthBalanceResponse(response)), std::runtime_error);
+}
+
+TEST(NodeTest, ParseEthBalanceResponseEmptyStringThrows) {
+    EXPECT_THROW(static_cast<void>(Node::parseEthBalanceResponse("")), std::runtime_error);
+}
+
+TEST(NodeTest, ParseEthBalanceResponseEmptyResultValueThrows) {
+    // The "result" key is present but its value is an empty string.
+    const std::string response =
+        R"({"status":"1","message":"OK","result":""})";
+    EXPECT_THROW(static_cast<void>(Node::parseEthBalanceResponse(response)), std::runtime_error);
+}
+
+TEST(NodeTest, ParseEthBalanceResponseUnterminatedResultThrows) {
+    // The closing quote after the result value is missing.
+    const std::string response = R"({"status":"1","message":"OK","result":"12345)";
+    EXPECT_THROW(static_cast<void>(Node::parseEthBalanceResponse(response)), std::runtime_error);
+}
+
+TEST(NodeTest, ParseEthBalanceResponseKnownAddress) {
+    // Simulated response for address 0x6fb9e80dDd0f5DC99D7cB38b07e8b298A57bF253.
+    const std::string response =
+        R"({"status":"1","message":"OK","result":"663046288842860073"})";
+    EXPECT_EQ(Node::parseEthBalanceResponse(response), "663046288842860073");
+}
