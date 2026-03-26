@@ -230,7 +230,7 @@ TEST(BlockchainTest, ChkpotpieThrowsWhenFromExceedsTo) {
 
 TEST(BlockchainTest, FetchAllFromReturnsMatchingBlocks) {
     Blockchain bc;
-    const std::string identifier = "https://github.com/Kushmanmb";
+    const std::string identifier = std::string(SOCIAL_PROFILE);
     bc.addBlock("Data linked to " + identifier);
     bc.addBlock("unrelated block");
 
@@ -243,12 +243,12 @@ TEST(BlockchainTest, FetchAllFromReturnsEmptyWhenNoMatch) {
     Blockchain bc;
     bc.addBlock("some data");
 
-    EXPECT_TRUE(bc.fetchAllFrom("https://github.com/Kushmanmb").empty());
+    EXPECT_TRUE(bc.fetchAllFrom(std::string(SOCIAL_PROFILE)).empty());
 }
 
 TEST(BlockchainTest, FetchAllFromReturnsMultipleMatchingBlocks) {
     Blockchain bc;
-    const std::string identifier = "https://github.com/Kushmanmb";
+    const std::string identifier = std::string(SOCIAL_PROFILE);
     bc.addBlock("First block linked to " + identifier);
     bc.addBlock("Second block linked to " + identifier);
     bc.addBlock("unrelated block");
@@ -259,7 +259,7 @@ TEST(BlockchainTest, FetchAllFromReturnsMultipleMatchingBlocks) {
 
 TEST(BlockchainTest, FetchAllFromResultsAreProperBlocks) {
     Blockchain bc;
-    const std::string identifier = "https://github.com/Kushmanmb";
+    const std::string identifier = std::string(SOCIAL_PROFILE);
     bc.addBlock("Data linked to " + identifier);
 
     const auto matches = bc.fetchAllFrom(identifier);
