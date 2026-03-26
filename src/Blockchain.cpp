@@ -1,4 +1,5 @@
 #include "Blockchain.h"
+#include "Logger.h"
 #include "sha256.h"
 
 #include <algorithm>
@@ -15,6 +16,7 @@ Blockchain::Blockchain() {
 
 void Blockchain::requireOwner(const std::string &callerAddress) const {
     if (!isOwner(callerAddress)) {
+        LOG_WARNING("Permission denied for caller: " + callerAddress);
         throw std::runtime_error(
             "Permission denied: caller '" + callerAddress + "' is not authorised");
     }
@@ -79,6 +81,8 @@ void Blockchain::addBlockInternal(const std::string &data) {
         data,
         prev.getHash()
     );
+    LOG_DEBUG("Block added index=" + std::to_string(chain.back().getIndex()) +
+              " hash=" + chain.back().getHash());
 }
 
 const std::vector<Block> &Blockchain::fetchAll() const {
@@ -120,6 +124,7 @@ Blockchain::getTrending(std::size_t topN) const {
 }
 
 bool Blockchain::validateSocialProfile() {
+    LOG_DEBUG("Blockchain::validateSocialProfile profile=" + std::string(SOCIAL_PROFILE));
     addBlockInternal(std::string(SOCIAL_PROFILE));
     return !fetchAllFrom(std::string(SOCIAL_PROFILE)).empty();
 }
