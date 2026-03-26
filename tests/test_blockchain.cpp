@@ -352,6 +352,48 @@ TEST(BlockchainTest, FetchAllFromFacebookProfileBlockHasValidProperties) {
     ASSERT_EQ(matches[0].getHash().size(), 64u);
 }
 
+// ---- fetchAllFrom(INSTAGRAM_PROFILE) tests -----------------------------
+
+TEST(BlockchainTest, FetchAllFromInstagramProfileReturnsMatchingBlock) {
+    Blockchain bc;
+    const std::string ig(INSTAGRAM_PROFILE);
+    bc.addBlock("Data linked to " + ig);
+    bc.addBlock("unrelated block");
+
+    const auto matches = bc.fetchAllFrom(ig);
+    ASSERT_EQ(matches.size(), 1u);
+    EXPECT_NE(matches[0].getData().find(ig), std::string::npos);
+}
+
+TEST(BlockchainTest, FetchAllFromInstagramProfileReturnsEmptyWhenNoMatch) {
+    Blockchain bc;
+    bc.addBlock("some data");
+
+    EXPECT_TRUE(bc.fetchAllFrom(std::string(INSTAGRAM_PROFILE)).empty());
+}
+
+TEST(BlockchainTest, FetchAllFromInstagramProfileReturnsMultipleMatches) {
+    Blockchain bc;
+    const std::string ig(INSTAGRAM_PROFILE);
+    bc.addBlock("First block linked to " + ig);
+    bc.addBlock("Second block linked to " + ig);
+    bc.addBlock("unrelated block");
+
+    const auto matches = bc.fetchAllFrom(ig);
+    ASSERT_EQ(matches.size(), 2u);
+}
+
+TEST(BlockchainTest, FetchAllFromInstagramProfileBlockHasValidProperties) {
+    Blockchain bc;
+    const std::string ig(INSTAGRAM_PROFILE);
+    bc.addBlock("Data linked to " + ig);
+
+    const auto matches = bc.fetchAllFrom(ig);
+    ASSERT_EQ(matches.size(), 1u);
+    EXPECT_EQ(matches[0].getIndex(), 1u);
+    ASSERT_EQ(matches[0].getHash().size(), 64u);
+}
+
 // ---- getTrending tests -------------------------------------------------
 
 TEST(BlockchainTest, GetTrendingReturnsEmptyForTopNZero) {
