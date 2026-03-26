@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Blockchain.h"
+#include <cstdint>
 #include <string>
 
 // A Node owns a Blockchain instance and can be started and stopped.
@@ -37,6 +38,19 @@ public:
     // Read-only access to the underlying chain.
     // Throws std::runtime_error if the node is not running.
     [[nodiscard]] const std::vector<Block> &fetchAll() const;
+
+    // Query the Etherscan v2 API for the latest Ethereum mainnet block number.
+    // Performs an HTTP GET to:
+    //   https://api.etherscan.io/v2/api?chainid=1&module=proxy&action=eth_blockNumber&apikey=<apiKey>
+    // Returns the block number as a uint64_t.
+    // Throws std::runtime_error on network failure or an unexpected response.
+    [[nodiscard]] static uint64_t fetchLatestEthBlockNumber(const std::string &apiKey);
+
+    // Parse an Etherscan eth_blockNumber JSON response and return the block number.
+    // Expected format: {"jsonrpc":"2.0","id":83,"result":"0x<hex>"}
+    // Throws std::runtime_error if the response is missing the "result" field or
+    // contains a malformed hex value.
+    [[nodiscard]] static uint64_t parseEthBlockNumberResponse(const std::string &response);
 
 private:
     Blockchain blockchain;

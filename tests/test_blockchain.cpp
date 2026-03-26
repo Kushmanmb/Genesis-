@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <limits>
 #include <type_traits>
 #include <sstream>
 #include "Block.h"
@@ -627,4 +628,50 @@ TEST(LoggerTest, LogOutputIncludesBracketedLevel) {
     std::cerr.rdbuf(oldBuf);
     // Output must contain the level label wrapped in brackets, e.g. "[INFO]".
     EXPECT_NE(capture.str().find("[INFO]"), std::string::npos);
+}
+
+// ---- Node::parseEthBlockNumberResponse tests ---------------------------
+
+TEST(NodeTest, ParseEthBlockNumberResponseTypicalHex) {
+    // Typical Etherscan response with a non-zero block number.
+    const std::string response =
+        R"({"jsonrpc":"2.0","id":83,"result":"0x1092261"})";
+    EXPECT_EQ(Node::parseEthBlockNumberResponse(response), 0x1092261ULL);
+}
+
+TEST(NodeTest, ParseEthBlockNumberResponseZero) {
+    const std::string response =
+        R"({"jsonrpc":"2.0","id":1,"result":"0x0"})";
+    EXPECT_EQ(Node::parseEthBlockNumberResponse(response), 0ULL);
+}
+
+TEST(NodeTest, ParseEthBlockNumberResponseLargeValue) {
+    // 0xFFFFFFFFFFFFFFFF is the maximum uint64 value.
+    const std::string response =
+        R"({"jsonrpc":"2.0","id":1,"result":"0xffffffffffffffff"})";
+    EXPECT_EQ(Node::parseEthBlockNumberResponse(response),
+              std::numeric_limits<uint64_t>::max());
+}
+
+TEST(NodeTest, ParseEthBlockNumberResponseMissingResultThrows) {
+    const std::string response =
+        R"({"jsonrpc":"2.0","id":83,"error":{"code":-32601,"message":"Method not found"}})";
+    EXPECT_THROW(static_cast<void>(Node::parseEthBlockNumberResponse(response)), std::runtime_error);
+}
+
+TEST(NodeTest, ParseEthBlockNumberResponseEmptyStringThrows) {
+    EXPECT_THROW(static_cast<void>(Node::parseEthBlockNumberResponse("")), std::runtime_error);
+}
+
+TEST(NodeTest, ParseEthBlockNumberResponseMalformedHexThrows) {
+    // "result" key is present but the value is not a valid hex number.
+    const std::string response =
+        R"({"jsonrpc":"2.0","id":1,"result":"not-a-hex"})";
+    EXPECT_THROW(static_cast<void>(Node::parseEthBlockNumberResponse(response)), std::runtime_error);
+}
+
+TEST(NodeTest, ParseEthBlockNumberResponseUnterminatedResultThrows) {
+    // The closing quote after the result value is missing.
+    const std::string response = R"({"result":"0x1234)";
+    EXPECT_THROW(static_cast<void>(Node::parseEthBlockNumberResponse(response)), std::runtime_error);
 }
