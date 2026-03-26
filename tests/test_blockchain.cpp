@@ -675,3 +675,10 @@ TEST(NodeTest, ParseEthBlockNumberResponseUnterminatedResultThrows) {
     const std::string response = R"({"result":"0x1234)";
     EXPECT_THROW(static_cast<void>(Node::parseEthBlockNumberResponse(response)), std::runtime_error);
 }
+
+TEST(NodeTest, ParseEthBlockNumberResponseKnownBlock) {
+    // Real-world Etherscan response: block 0x1798f7b.
+    const std::string response =
+        R"({"jsonrpc":"2.0","id":83,"result":"0x1798f7b"})";
+    EXPECT_EQ(Node::parseEthBlockNumberResponse(response), 0x1798f7bULL);
+}
