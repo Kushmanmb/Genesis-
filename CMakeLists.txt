@@ -7,6 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Enable debug logging by passing -DGENESIS_DEBUG=ON to cmake.
 option(GENESIS_DEBUG "Enable debug-level logging to stderr" OFF)
 
+find_package(CURL REQUIRED)
+
 add_executable(genesis
     src/main.cpp
     src/sha256.cpp
@@ -16,6 +18,7 @@ add_executable(genesis
 )
 
 target_include_directories(genesis PRIVATE src)
+target_link_libraries(genesis PRIVATE CURL::libcurl)
 
 if(GENESIS_DEBUG)
     target_compile_definitions(genesis PRIVATE GENESIS_DEBUG)
@@ -35,7 +38,7 @@ add_executable(genesis_tests
 )
 
 target_include_directories(genesis_tests PRIVATE src)
-target_link_libraries(genesis_tests GTest::GTest GTest::Main)
+target_link_libraries(genesis_tests GTest::GTest GTest::Main CURL::libcurl)
 
 if(GENESIS_DEBUG)
     target_compile_definitions(genesis_tests PRIVATE GENESIS_DEBUG)
