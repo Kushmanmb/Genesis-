@@ -419,3 +419,45 @@ TEST(BlockchainTest, GetTrendingTopNLargerThanChainReturnsAll) {
     const auto trending = bc.getTrending(100);
     EXPECT_EQ(trending.size(), 2u);
 }
+
+// ---- validateSocialProfile tests ---------------------------------------
+
+TEST(BlockchainTest, ValidateSocialProfileReturnsTrue) {
+    Blockchain bc;
+    EXPECT_TRUE(bc.validateSocialProfile());
+}
+
+TEST(BlockchainTest, ValidateSocialProfileAddsBlockToChain) {
+    Blockchain bc;
+    const size_t sizeBefore = bc.fetchAll().size();
+    bc.validateSocialProfile();
+    EXPECT_EQ(bc.fetchAll().size(), sizeBefore + 1);
+}
+
+TEST(BlockchainTest, ValidateSocialProfileBlockDataMatchesSocialProfile) {
+    Blockchain bc;
+    bc.validateSocialProfile();
+    const auto matches = bc.fetchAllFrom(std::string(SOCIAL_PROFILE));
+    ASSERT_EQ(matches.size(), 1u);
+    EXPECT_EQ(matches[0].getData(), std::string(SOCIAL_PROFILE));
+}
+
+TEST(BlockchainTest, ValidateSocialProfileCanBeCalledMultipleTimes) {
+    Blockchain bc;
+    EXPECT_TRUE(bc.validateSocialProfile());
+    EXPECT_TRUE(bc.validateSocialProfile());
+    // Two profile blocks should now be recorded.
+    EXPECT_EQ(bc.fetchAllFrom(std::string(SOCIAL_PROFILE)).size(), 2u);
+}
+
+TEST(NodeTest, ValidateSocialProfileThrowsWhenNodeNotRunning) {
+    Node node;
+    EXPECT_THROW(node.validateSocialProfile(), std::runtime_error);
+}
+
+TEST(NodeTest, ValidateSocialProfileReturnsTrueWhenRunning) {
+    Node node;
+    node.start();
+    EXPECT_TRUE(node.validateSocialProfile());
+    node.stop();
+}

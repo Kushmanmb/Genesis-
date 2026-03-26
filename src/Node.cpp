@@ -29,3 +29,10 @@ const std::vector<Block> &Node::fetchAll() const {
     }
     return blockchain.fetchAll();
 }
+
+bool Node::validateSocialProfile() {
+    if (!running) {
+        throw std::runtime_error("Node is not running");
+    }
+    return blockchain.validateSocialProfile();
+}

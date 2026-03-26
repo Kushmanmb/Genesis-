@@ -137,3 +137,8 @@ Blockchain::getTrending(std::size_t topN) const {
     }
     return ranked;
 }
+
+bool Blockchain::validateSocialProfile() {
+    addBlockInternal(std::string(SOCIAL_PROFILE));
+    return true;
+}
