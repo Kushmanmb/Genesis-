@@ -1,7 +1,9 @@
 #include <gtest/gtest.h>
 #include <type_traits>
+#include <sstream>
 #include "Block.h"
 #include "Blockchain.h"
+#include "Logger.h"
 #include "Node.h"
 #include "Owners.h"
 
@@ -567,4 +569,62 @@ TEST(NodeTest, AnnounceDeniedForUnauthorizedCallerWhenRunning) {
         std::runtime_error
     );
     node.stop();
+}
+
+// ---- Logger tests -------------------------------------------------------
+
+TEST(LoggerTest, LogDebugWritesToStderr) {
+    // Redirect std::cerr to a string stream for inspection.
+    std::ostringstream capture;
+    std::streambuf *oldBuf = std::cerr.rdbuf(capture.rdbuf());
+
+    Logger::log(Logger::Level::DEBUG, "test debug message");
+
+    std::cerr.rdbuf(oldBuf);
+    EXPECT_NE(capture.str().find("DEBUG"), std::string::npos);
+    EXPECT_NE(capture.str().find("test debug message"), std::string::npos);
+}
+
+TEST(LoggerTest, LogInfoWritesToStderr) {
+    std::ostringstream capture;
+    std::streambuf *oldBuf = std::cerr.rdbuf(capture.rdbuf());
+
+    Logger::log(Logger::Level::INFO, "test info message");
+
+    std::cerr.rdbuf(oldBuf);
+    EXPECT_NE(capture.str().find("INFO"), std::string::npos);
+    EXPECT_NE(capture.str().find("test info message"), std::string::npos);
+}
+
+TEST(LoggerTest, LogWarningWritesToStderr) {
+    std::ostringstream capture;
+    std::streambuf *oldBuf = std::cerr.rdbuf(capture.rdbuf());
+
+    Logger::log(Logger::Level::WARNING, "test warning message");
+
+    std::cerr.rdbuf(oldBuf);
+    EXPECT_NE(capture.str().find("WARNING"), std::string::npos);
+    EXPECT_NE(capture.str().find("test warning message"), std::string::npos);
+}
+
+TEST(LoggerTest, LogErrorWritesToStderr) {
+    std::ostringstream capture;
+    std::streambuf *oldBuf = std::cerr.rdbuf(capture.rdbuf());
+
+    Logger::log(Logger::Level::ERROR, "test error message");
+
+    std::cerr.rdbuf(oldBuf);
+    EXPECT_NE(capture.str().find("ERROR"), std::string::npos);
+    EXPECT_NE(capture.str().find("test error message"), std::string::npos);
+}
+
+TEST(LoggerTest, LogOutputIncludesBracketedLevel) {
+    std::ostringstream capture;
+    std::streambuf *oldBuf = std::cerr.rdbuf(capture.rdbuf());
+
+    Logger::log(Logger::Level::INFO, "bracketed");
+
+    std::cerr.rdbuf(oldBuf);
+    // Output must contain the level label wrapped in brackets, e.g. "[INFO]".
+    EXPECT_NE(capture.str().find("[INFO]"), std::string::npos);
 }
