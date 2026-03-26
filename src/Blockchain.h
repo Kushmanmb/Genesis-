@@ -37,17 +37,17 @@ public:
 
     // Compute a SHA-256 checksum over the hashes of blocks [fromIndex, toIndex].
     // Throws std::out_of_range if the range is invalid.
-    std::string chkpotpie(uint32_t fromIndex, uint32_t toIndex) const;
+    [[nodiscard]] std::string computeRangeChecksum(uint32_t fromIndex, uint32_t toIndex) const;
 
-    const std::vector<Block> &fetchAll() const;
+    [[nodiscard]] const std::vector<Block> &fetchAll() const;
 
     // Return all blocks whose data field contains the given identifier string.
-    std::vector<Block> fetchAllFrom(const std::string &identifier) const;
+    [[nodiscard]] std::vector<Block> fetchAllFrom(const std::string &identifier) const;
 
     // Return the top-N most frequently appearing data strings across all blocks,
     // sorted by frequency descending.  Each entry is a (data, count) pair.
     // If topN is 0 or the chain is empty, returns an empty vector.
-    std::vector<std::pair<std::string, std::size_t>> getTrending(std::size_t topN = 5) const;
+    [[nodiscard]] std::vector<std::pair<std::string, std::size_t>> getTrending(std::size_t topN = 5) const;
 
     // Broadcast an announcement by recording "Announcement: <message>" as a block
     // on the chain; callerAddress must be an authorised owner.
@@ -55,7 +55,7 @@ public:
 
     // Record the owner's social profile (SOCIAL_PROFILE) as a block on the chain
     // and return true if the profile is confirmed in the chain afterwards.
-    bool validateSocialProfile();
+    [[nodiscard]] bool validateSocialProfile();
 
 private:
     // Throws if callerAddress is not an authorised owner.
@@ -63,6 +63,10 @@ private:
 
     // Internal helper — no ownership check; only callable from within the class.
     void addBlockInternal(const std::string &data);
+
+    // Returns a string of the form " [addr1] [addr2] ..." for all OWNER_ADDRESSES.
+    // Used by the token-operation methods to build their chain records.
+    [[nodiscard]] static std::string ownerAddressList();
 
     std::vector<Block> chain;
 };

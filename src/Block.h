@@ -9,14 +9,14 @@ public:
     Block(uint32_t index, const std::string &data, const std::string &previousHash,
           std::time_t timestamp = std::time(nullptr));
 
-    uint32_t    getIndex()        const { return index; }
-    std::time_t getTimestamp()    const { return timestamp; }
-    std::string getData()         const { return data; }
-    std::string getPreviousHash() const { return previousHash; }
-    std::string getHash()         const { return hash; }
+    [[nodiscard]] uint32_t    getIndex()        const { return index; }
+    [[nodiscard]] std::time_t getTimestamp()    const { return timestamp; }
+    [[nodiscard]] std::string getData()         const { return data; }
+    [[nodiscard]] std::string getPreviousHash() const { return previousHash; }
+    [[nodiscard]] std::string getHash()         const { return hash; }
 
     static Block createGenesis();
-    std::string toString() const;
+    [[nodiscard]] std::string toString() const;
 
 private:
     const uint32_t    index;

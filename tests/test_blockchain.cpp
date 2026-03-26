@@ -183,12 +183,12 @@ TEST(BlockchainTest, ConsolidateBalancesDoesNotChangeChainSizeOnDenial) {
     EXPECT_EQ(bc.fetchAll().size(), sizeBefore);
 }
 
-// ---- chkpotpie tests ---------------------------------------------------
+// ---- computeRangeChecksum tests -------------------------------------------
 
 TEST(BlockchainTest, ChkpotpieReturnsSha256Hash) {
     Blockchain bc;
     bc.addBlock("A");
-    const std::string result = bc.chkpotpie(0, 1);
+    const std::string result = bc.computeRangeChecksum(0, 1);
 
     ASSERT_EQ(result.size(), 64u);
     for (char c : result) {
@@ -202,28 +202,28 @@ TEST(BlockchainTest, ChkpotpieIsDeterministic) {
     bc.addBlock("A");
     bc.addBlock("B");
 
-    EXPECT_EQ(bc.chkpotpie(0, 0), bc.chkpotpie(0, 0));
-    EXPECT_EQ(bc.chkpotpie(0, 2), bc.chkpotpie(0, 2));
+    EXPECT_EQ(bc.computeRangeChecksum(0, 0), bc.computeRangeChecksum(0, 0));
+    EXPECT_EQ(bc.computeRangeChecksum(0, 2), bc.computeRangeChecksum(0, 2));
 }
 
 TEST(BlockchainTest, ChkpotpieSingleBlockEqualsBlockHash) {
     Blockchain bc;
-    // chkpotpie over a single block is sha256 of that block's hash.
+    // computeRangeChecksum over a single block is sha256 of that block's hash.
     // Verify it returns a valid 64-char hex string distinct from the block hash itself.
-    const std::string result = bc.chkpotpie(0, 0);
+    const std::string result = bc.computeRangeChecksum(0, 0);
     ASSERT_EQ(result.size(), 64u);
     EXPECT_NE(result, bc.fetchAll()[0].getHash());
 }
 
 TEST(BlockchainTest, ChkpotpieThrowsOnOutOfRangeIndex) {
     Blockchain bc;
-    EXPECT_THROW(bc.chkpotpie(0, 5), std::out_of_range);
+    EXPECT_THROW(bc.computeRangeChecksum(0, 5), std::out_of_range);
 }
 
 TEST(BlockchainTest, ChkpotpieThrowsWhenFromExceedsTo) {
     Blockchain bc;
     bc.addBlock("A");
-    EXPECT_THROW(bc.chkpotpie(1, 0), std::out_of_range);
+    EXPECT_THROW(bc.computeRangeChecksum(1, 0), std::out_of_range);
 }
 
 // ---- fetchAllFrom tests ------------------------------------------------
@@ -499,13 +499,13 @@ TEST(BlockchainTest, ValidateSocialProfileReturnsTrue) {
 TEST(BlockchainTest, ValidateSocialProfileAddsBlockToChain) {
     Blockchain bc;
     const size_t sizeBefore = bc.fetchAll().size();
-    bc.validateSocialProfile();
+    EXPECT_TRUE(bc.validateSocialProfile());
     EXPECT_EQ(bc.fetchAll().size(), sizeBefore + 1);
 }
 
 TEST(BlockchainTest, ValidateSocialProfileBlockDataMatchesSocialProfile) {
     Blockchain bc;
-    bc.validateSocialProfile();
+    EXPECT_TRUE(bc.validateSocialProfile());
     const auto matches = bc.fetchAllFrom(std::string(SOCIAL_PROFILE));
     ASSERT_EQ(matches.size(), 1u);
     EXPECT_EQ(matches[0].getData(), std::string(SOCIAL_PROFILE));
@@ -521,7 +521,7 @@ TEST(BlockchainTest, ValidateSocialProfileCanBeCalledMultipleTimes) {
 
 TEST(NodeTest, ValidateSocialProfileThrowsWhenNodeNotRunning) {
     Node node;
-    EXPECT_THROW(node.validateSocialProfile(), std::runtime_error);
+    EXPECT_THROW(static_cast<void>(node.validateSocialProfile()), std::runtime_error);
 }
 
 TEST(NodeTest, ValidateSocialProfileReturnsTrueWhenRunning) {
