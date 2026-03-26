@@ -420,6 +420,48 @@ TEST(BlockchainTest, GetTrendingTopNLargerThanChainReturnsAll) {
     EXPECT_EQ(trending.size(), 2u);
 }
 
+// ---- fetchAllFrom(PHONE_NUMBER) tests ----------------------------------
+
+TEST(BlockchainTest, FetchAllFromPhoneNumberReturnsMatchingBlock) {
+    Blockchain bc;
+    const std::string phone(PHONE_NUMBER);
+    bc.addBlock("Data linked to " + phone);
+    bc.addBlock("unrelated block");
+
+    const auto matches = bc.fetchAllFrom(phone);
+    ASSERT_EQ(matches.size(), 1u);
+    EXPECT_NE(matches[0].getData().find(phone), std::string::npos);
+}
+
+TEST(BlockchainTest, FetchAllFromPhoneNumberReturnsEmptyWhenNoMatch) {
+    Blockchain bc;
+    bc.addBlock("some data");
+
+    EXPECT_TRUE(bc.fetchAllFrom(std::string(PHONE_NUMBER)).empty());
+}
+
+TEST(BlockchainTest, FetchAllFromPhoneNumberReturnsMultipleMatches) {
+    Blockchain bc;
+    const std::string phone(PHONE_NUMBER);
+    bc.addBlock("First block linked to " + phone);
+    bc.addBlock("Second block linked to " + phone);
+    bc.addBlock("unrelated block");
+
+    const auto matches = bc.fetchAllFrom(phone);
+    ASSERT_EQ(matches.size(), 2u);
+}
+
+TEST(BlockchainTest, FetchAllFromPhoneNumberBlockHasValidProperties) {
+    Blockchain bc;
+    const std::string phone(PHONE_NUMBER);
+    bc.addBlock("Data linked to " + phone);
+
+    const auto matches = bc.fetchAllFrom(phone);
+    ASSERT_EQ(matches.size(), 1u);
+    EXPECT_EQ(matches[0].getIndex(), 1u);
+    ASSERT_EQ(matches[0].getHash().size(), 64u);
+}
+
 // ---- validateSocialProfile tests ---------------------------------------
 
 TEST(BlockchainTest, ValidateSocialProfileReturnsTrue) {

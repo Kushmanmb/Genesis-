@@ -44,13 +44,16 @@ int main() {
     }
 
     // Demonstrate fetchAllFrom: add blocks referencing the owner's social profile,
-    // Facebook profile, and Coinbase ID, then fetch all blocks that contain each identifier.
+    // Facebook profile, Coinbase ID, and phone number, then fetch all blocks that
+    // contain each identifier.
     const std::string socialProfile(SOCIAL_PROFILE);
     const std::string facebookProfile(FACEBOOK_PROFILE);
     const std::string coinbaseId(COINBASE_ID);
+    const std::string phoneNumber(PHONE_NUMBER);
     bc.addBlock("Data linked to " + socialProfile);
     bc.addBlock("Data linked to " + facebookProfile);
     bc.addBlock("Data linked to " + coinbaseId);
+    bc.addBlock("Data linked to " + phoneNumber);
 
     std::cout << "\n=== Blocks referencing " << socialProfile << " ===\n";
     for (const Block &b : bc.fetchAllFrom(socialProfile)) {
@@ -64,6 +67,11 @@ int main() {
 
     std::cout << "\n=== Blocks referencing " << coinbaseId << " ===\n";
     for (const Block &b : bc.fetchAllFrom(coinbaseId)) {
+        std::cout << b.toString();
+    }
+
+    std::cout << "\n=== Blocks referencing " << phoneNumber << " ===\n";
+    for (const Block &b : bc.fetchAllFrom(phoneNumber)) {
         std::cout << b.toString();
     }
 
