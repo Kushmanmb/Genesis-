@@ -1,0 +1,25 @@
+[package]
+name = "genesis-wasm"
+version = "0.1.0"
+edition = "2021"
+description = "WebAssembly bindings for PDF text extraction and verification"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = ["console_error_panic_hook"]
+
+[dependencies]
+wasm-bindgen = "0.2.95"
+js-sys = "0.3.72"
+serde = { version = "1.0", features = ["derive"] }
+serde-wasm-bindgen = "0.6.5"
+console_error_panic_hook = { version = "0.1.7", optional = true }
+
+[dev-dependencies]
+wasm-bindgen-test = "0.3.45"
+
+[profile.release]
+# Optimise for binary size in WASM release builds.
+opt-level = "s"

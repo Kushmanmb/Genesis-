@@ -1,1 +1,5 @@
 build/
+
+# Rust / wasm-pack build artifacts
+target/
+pkg/
