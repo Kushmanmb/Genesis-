@@ -49,6 +49,10 @@ public:
     // If topN is 0 or the chain is empty, returns an empty vector.
     std::vector<std::pair<std::string, std::size_t>> getTrending(std::size_t topN = 5) const;
 
+    // Record the owner's social profile (SOCIAL_PROFILE) as a block on the chain
+    // and return true if the profile is confirmed in the chain afterwards.
+    bool validateSocialProfile();
+
 private:
     // Throws if callerAddress is not an authorised owner.
     void requireOwner(const std::string &callerAddress) const;

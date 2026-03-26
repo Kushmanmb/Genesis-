@@ -25,6 +25,10 @@ public:
     // Throws std::runtime_error if the node is not running.
     void addBlock(const std::string &data, const std::string &callerAddress);
 
+    // Record the owner's social profile on the underlying chain and return true
+    // if it is confirmed.  Throws std::runtime_error if the node is not running.
+    bool validateSocialProfile();
+
     // Read-only access to the underlying chain.
     // Throws std::runtime_error if the node is not running.
     const std::vector<Block> &fetchAll() const;

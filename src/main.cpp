@@ -67,6 +67,11 @@ int main() {
         std::cout << b.toString();
     }
 
+    // Validate the owner's social profile by recording it on the blockchain.
+    const bool validated = bc.validateSocialProfile();
+    std::cout << "\nSocial profile validated on chain: " << (validated ? "yes" : "no") << "\n";
+    std::cout << "Profile: " << SOCIAL_PROFILE << "\n";
+
     std::cout << "=== All Blocks ===\n";
     for (const Block &b : bc.fetchAll()) {
         std::cout << b.toString();
