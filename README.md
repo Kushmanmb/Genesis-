@@ -56,6 +56,7 @@ Block #2
 - `INSTAGRAM_PROFILE` — owner's Instagram profile: `https://www.instagram.com/kushmanmb/`.
 - `COINBASE_ID` — owner's Coinbase ID: `kushman.cb.id`.
 - `PHONE_NUMBER` — owner's phone number: `18542123378`.
+- `ETHERSCAN_API_KEY` — Etherscan API key used for querying the Etherscan v2 API.
 
 ## Immutability
 
