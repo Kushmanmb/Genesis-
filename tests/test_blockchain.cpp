@@ -786,3 +786,11 @@ TEST(NodeTest, ParseTokenSupplyResponseKnownContract) {
         R"({"status":"1","message":"OK","result":"21265524714464496430135228"})";
     EXPECT_EQ(Node::parseTokenSupplyResponse(response), "21265524714464496430135228");
 }
+
+// ---- Owners.h constant tests -------------------------------------------
+
+TEST(OwnersTest, EtherscanApiKeyIsSet) {
+    // Verify that the ETHERSCAN_API_KEY constant is non-empty and holds the expected key.
+    EXPECT_FALSE(std::string(ETHERSCAN_API_KEY).empty());
+    EXPECT_EQ(std::string(ETHERSCAN_API_KEY), "qu4g9niymiy7lacsmp6echxqdkjfgmkc3fskedyenzcyem9g8x");
+}
