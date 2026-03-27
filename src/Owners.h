@@ -25,7 +25,7 @@ inline constexpr std::string_view COINBASE_ID = "kushman.cb.id";
 inline constexpr std::string_view PHONE_NUMBER = "18542123378";
 
 // Etherscan API key used for querying the Etherscan v2 API.
-inline constexpr std::string_view ETHERSCAN_API_KEY = "qu4g9niymiy7lacsmp6echxqdkjfgmkc3fskedyenzcyem9g8x";
+inline constexpr std::string_view ETHERSCAN_API_KEY = "I15Y6KMUZM5QZU9HY96SI5ZZRHHXA2D2IF";
 
 // Returns true when `address` matches one of the configured owner addresses
 // (case-sensitive, as Ethereum checksummed addresses are case-sensitive).
