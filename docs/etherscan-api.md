@@ -44,14 +44,13 @@ An API key is **required** by Etherscan to:
 
 **Using the key in this project:**
 
-The key is stored in `src/Owners.h` as the compile-time constant `ETHERSCAN_API_KEY` and is passed to the `Node::fetch*` helper functions at runtime. To use your own key, update that constant before building:
+The key is resolved at runtime by `src/Owners.h`: it reads the `ETHERSCAN_API_KEY` environment variable and falls back to a placeholder if unset. Export your key before running the app/tests:
 
-```cpp
-// src/Owners.h
-inline constexpr std::string_view ETHERSCAN_API_KEY = "<your-api-key-here>";
+```bash
+export ETHERSCAN_API_KEY="<your-api-key-here>"
 ```
 
-> **Warning:** Never commit a real API key to a public repository. Consider loading it from an environment variable or a secrets manager in production builds.
+> **Warning:** Never commit a real API key to a public repository.
 
 ---
 

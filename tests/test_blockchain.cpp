@@ -630,6 +630,52 @@ TEST(LoggerTest, LogOutputIncludesBracketedLevel) {
     EXPECT_NE(capture.str().find("[INFO]"), std::string::npos);
 }
 
+// ---- Node Etherscan input-validation tests ------------------------------
+
+TEST(NodeTest, FetchLatestEthBlockNumberRejectsPlaceholderApiKey) {
+    EXPECT_THROW(
+        static_cast<void>(Node::fetchLatestEthBlockNumber(std::string(ETHERSCAN_API_KEY_PLACEHOLDER))),
+        std::invalid_argument
+    );
+}
+
+TEST(NodeTest, FetchLatestEthBlockNumberRejectsEmptyApiKey) {
+    EXPECT_THROW(
+        static_cast<void>(Node::fetchLatestEthBlockNumber("")),
+        std::invalid_argument
+    );
+}
+
+TEST(NodeTest, FetchEthBalanceRejectsEmptyAddress) {
+    EXPECT_THROW(
+        static_cast<void>(Node::fetchEthBalance("", "some_key")),
+        std::invalid_argument
+    );
+}
+
+TEST(NodeTest, FetchEthBalanceRejectsPlaceholderApiKey) {
+    EXPECT_THROW(
+        static_cast<void>(Node::fetchEthBalance("0x0000000000000000000000000000000000000000",
+                                                std::string(ETHERSCAN_API_KEY_PLACEHOLDER))),
+        std::invalid_argument
+    );
+}
+
+TEST(NodeTest, FetchTokenSupplyRejectsEmptyContractAddress) {
+    EXPECT_THROW(
+        static_cast<void>(Node::fetchTokenSupply("", "some_key")),
+        std::invalid_argument
+    );
+}
+
+TEST(NodeTest, FetchTokenSupplyRejectsPlaceholderApiKey) {
+    EXPECT_THROW(
+        static_cast<void>(Node::fetchTokenSupply("0x57d90b64a1a57749b0f932f1a3395792e12e7055",
+                                                 std::string(ETHERSCAN_API_KEY_PLACEHOLDER))),
+        std::invalid_argument
+    );
+}
+
 // ---- Node::parseEthBlockNumberResponse tests ---------------------------
 
 TEST(NodeTest, ParseEthBlockNumberResponseTypicalHex) {
@@ -790,7 +836,14 @@ TEST(NodeTest, ParseTokenSupplyResponseKnownContract) {
 // ---- Owners.h constant tests -------------------------------------------
 
 TEST(OwnersTest, EtherscanApiKeyIsSet) {
-    // Verify that the ETHERSCAN_API_KEY constant is set to the expected placeholder value.
-    EXPECT_FALSE(std::string(ETHERSCAN_API_KEY).empty());
-    EXPECT_EQ(std::string(ETHERSCAN_API_KEY), "YOUR_ETHERSCAN_API_KEY");
+    EXPECT_EQ(std::string(ETHERSCAN_API_KEY_PLACEHOLDER), "YOUR_ETHERSCAN_API_KEY");
+    EXPECT_FALSE(ETHERSCAN_API_KEY.empty());
+}
+
+TEST(OwnersTest, ProfileAndIdentityPlaceholdersAreSet) {
+    EXPECT_EQ(std::string(SOCIAL_PROFILE), "https://github.com/YOUR_PROFILE");
+    EXPECT_EQ(std::string(FACEBOOK_PROFILE), "https://www.facebook.com/YOUR_PROFILE");
+    EXPECT_EQ(std::string(INSTAGRAM_PROFILE), "https://www.instagram.com/YOUR_PROFILE/");
+    EXPECT_EQ(std::string(COINBASE_ID), "YOUR_COINBASE_ID");
+    EXPECT_EQ(std::string(PHONE_NUMBER), "YOUR_PHONE_NUMBER");
 }

@@ -46,17 +46,17 @@ Block #2
 - `announce(message, callerAddress)` — records "Announcement: <message>" as a block on the chain; `callerAddress` must be an authorised owner.
 - `fetchAll()` — returns a const reference to the full vector of blocks.
 - `fetchAllFrom(identifier)` — returns a copy of all blocks whose data field contains `identifier`.
-- `validateSocialProfile()` — records the owner's `SOCIAL_PROFILE` URL (`https://github.com/Kushmanmb`) as a block on the chain and returns `true` once the profile is confirmed to be present in the chain.
+- `validateSocialProfile()` — records the owner's `SOCIAL_PROFILE` URL (`https://github.com/YOUR_PROFILE`) as a block on the chain and returns `true` once the profile is confirmed to be present in the chain.
 
 ## Owner Identity Constants (`Owners.h`)
 
 - `OWNER_ADDRESSES` — list of Ethereum addresses with owner-level permissions (currently empty; all owner-gated operations are rejected).
-- `SOCIAL_PROFILE` — owner's GitHub profile: `https://github.com/Kushmanmb`.
-- `FACEBOOK_PROFILE` — owner Facebook root URL placeholder: `https://www.facebook.com/`.
-- `INSTAGRAM_PROFILE` — owner Instagram root URL placeholder: `https://www.instagram.com/`.
+- `SOCIAL_PROFILE` — placeholder GitHub profile URL: `https://github.com/YOUR_PROFILE`.
+- `FACEBOOK_PROFILE` — placeholder Facebook profile URL: `https://www.facebook.com/YOUR_PROFILE`.
+- `INSTAGRAM_PROFILE` — placeholder Instagram profile URL: `https://www.instagram.com/YOUR_PROFILE/`.
 - `COINBASE_ID` — placeholder Coinbase ID: `YOUR_COINBASE_ID`.
 - `PHONE_NUMBER` — placeholder phone number: `YOUR_PHONE_NUMBER`.
-- `ETHERSCAN_API_KEY` — placeholder API key string. Replace it locally with your real key before Etherscan API calls. See [`./docs/etherscan-api.md`](./docs/etherscan-api.md) for usage details.
+- `ETHERSCAN_API_KEY` — runtime API key string resolved from the `ETHERSCAN_API_KEY` environment variable, or a placeholder when the variable is unset. See [`./docs/etherscan-api.md`](./docs/etherscan-api.md) for usage details.
 
 ## Immutability
 
