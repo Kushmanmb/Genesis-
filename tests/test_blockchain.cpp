@@ -9,6 +9,40 @@
 #include "Node.h"
 #include "Owners.h"
 
+namespace {
+class ScopedEnvVar {
+public:
+    explicit ScopedEnvVar(const char *name) : name_(name) {
+        const char *original = std::getenv(name_);
+        hadOriginal_ = (original != nullptr);
+        if (hadOriginal_) {
+            originalValue_ = original;
+        }
+    }
+
+    ~ScopedEnvVar() {
+        if (hadOriginal_) {
+            setenv(name_, originalValue_.c_str(), 1);
+        } else {
+            unsetenv(name_);
+        }
+    }
+
+    void set(const char *value) const {
+        setenv(name_, value, 1);
+    }
+
+    void unset() const {
+        unsetenv(name_);
+    }
+
+private:
+    const char *name_;
+    bool hadOriginal_{false};
+    std::string originalValue_;
+};
+} // namespace
+
 // ---- Block immutability static checks ----------------------------------
 
 // Block must be copy-constructible (so it can be stored in std::vector) but
@@ -939,31 +973,13 @@ TEST(OwnersTest, ProfileAndIdentityConstantsAreSet) {
 }
 
 TEST(OwnersTest, ResolvePhoneNumberFallsBackToPlaceholderWhenUnset) {
-    const char *original = std::getenv("PHONE_NUMBER");
-    const std::string originalValue = original ? std::string(original) : std::string();
-    const bool hadOriginal = original != nullptr;
-
-    unsetenv("PHONE_NUMBER");
+    const ScopedEnvVar env("PHONE_NUMBER");
+    env.unset();
     EXPECT_EQ(resolvePhoneNumber(), std::string(PHONE_NUMBER_PLACEHOLDER));
-
-    if (hadOriginal) {
-        setenv("PHONE_NUMBER", originalValue.c_str(), 1);
-    } else {
-        unsetenv("PHONE_NUMBER");
-    }
 }
 
 TEST(OwnersTest, ResolvePhoneNumberUsesEnvironmentWhenSet) {
-    const char *original = std::getenv("PHONE_NUMBER");
-    const std::string originalValue = original ? std::string(original) : std::string();
-    const bool hadOriginal = original != nullptr;
-
-    setenv("PHONE_NUMBER", "+1234567890", 1);
+    const ScopedEnvVar env("PHONE_NUMBER");
+    env.set("+1234567890");
     EXPECT_EQ(resolvePhoneNumber(), "+1234567890");
-
-    if (hadOriginal) {
-        setenv("PHONE_NUMBER", originalValue.c_str(), 1);
-    } else {
-        unsetenv("PHONE_NUMBER");
-    }
 }

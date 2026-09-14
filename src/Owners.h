@@ -76,6 +76,7 @@ inline std::string resolvePhoneNumber() {
     return std::string(PHONE_NUMBER_PLACEHOLDER);
 }
 
+// Startup-time snapshot of the owner phone number.
 inline const std::string PHONE_NUMBER = resolvePhoneNumber();
 
 // Etherscan API key used for querying the Etherscan v2 API.
