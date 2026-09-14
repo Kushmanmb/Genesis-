@@ -50,7 +50,7 @@ Block #2
 
 ## Owner Identity Constants (`Owners.h`)
 
-- `OWNER_ADDRESSES` — runtime owner address strings used for exact-match authorization; entries may be hexadecimal wallet addresses or ENS names. By default it contains one entry, `Yaketh.eth`, and can be overridden at runtime with the `OWNER_ADDRESSES` environment variable as a comma-separated list.
+- Owner authorization uses exact-match address strings; entries may be hexadecimal wallet addresses or ENS names. The default owner is `Yaketh.eth`, and the `OWNER_ADDRESSES` environment variable can override it with a comma-separated list at runtime.
 - `SOCIAL_PROFILE` — placeholder GitHub profile URL: `https://github.com/YOUR_PROFILE`.
 - `FACEBOOK_PROFILE` — placeholder Facebook profile URL: `https://www.facebook.com/YOUR_PROFILE`.
 - `INSTAGRAM_PROFILE` — placeholder Instagram profile URL: `https://www.instagram.com/YOUR_PROFILE/`.

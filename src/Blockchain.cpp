@@ -136,7 +136,7 @@ void Blockchain::announce(const std::string &message, const std::string &callerA
 
 std::string Blockchain::ownerAddressList() {
     std::ostringstream oss;
-    for (const auto &addr : OWNER_ADDRESSES) {
+    for (const auto &addr : ownerAddresses()) {
         oss << " [" << addr << "]";
     }
     return oss.str();
