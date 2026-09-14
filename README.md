@@ -46,12 +46,12 @@ Block #2
 - `announce(message, callerAddress)` — records "Announcement: <message>" as a block on the chain; `callerAddress` must be an authorised owner.
 - `fetchAll()` — returns a const reference to the full vector of blocks.
 - `fetchAllFrom(identifier)` — returns a copy of all blocks whose data field contains `identifier`.
-- `validateSocialProfile()` — records the owner's `SOCIAL_PROFILE` URL (`https://github.com/YOUR_PROFILE`) as a block on the chain and returns `true` once the profile is confirmed to be present in the chain.
+- `validateSocialProfile()` — records the owner's `SOCIAL_PROFILE` URL (`https://github.com/Kushmanmb`) as a block on the chain and returns `true` once the profile is confirmed to be present in the chain.
 
 ## Owner Identity Constants (`Owners.h`)
 
 - Owner authorization uses exact-match address strings; entries may be hexadecimal wallet addresses or ENS names. The default owner is `Yaketh.eth`, and the `OWNER_ADDRESSES` environment variable can override it with a comma-separated list at runtime.
-- `SOCIAL_PROFILE` — placeholder GitHub profile URL: `https://github.com/YOUR_PROFILE`.
+- `SOCIAL_PROFILE` — configured GitHub profile URL: `https://github.com/Kushmanmb`.
 - `FACEBOOK_PROFILE` — placeholder Facebook profile URL: `https://www.facebook.com/YOUR_PROFILE`.
 - `INSTAGRAM_PROFILE` — placeholder Instagram profile URL: `https://www.instagram.com/YOUR_PROFILE/`.
 - `COINBASE_ID` — placeholder Coinbase ID: `YOUR_COINBASE_ID`.
