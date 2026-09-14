@@ -52,7 +52,7 @@ Block #2
 
 - Owner authorization uses exact-match address strings; entries may be hexadecimal wallet addresses or ENS names. The default owner is `Yaketh.eth`, and the `OWNER_ADDRESSES` environment variable can override it with a comma-separated list at runtime.
 - `SOCIAL_PROFILE` — configured GitHub profile URL: `https://github.com/Kushmanmb`.
-- `FACEBOOK_PROFILE` — placeholder Facebook profile URL: `https://www.facebook.com/YOUR_PROFILE`.
+- `FACEBOOK_PROFILE` — configured Facebook profile URL: `https://www.facebook.com/Kushmanmb`.
 - `INSTAGRAM_PROFILE` — placeholder Instagram profile URL: `https://www.instagram.com/YOUR_PROFILE/`.
 - `COINBASE_ID` — placeholder Coinbase ID: `YOUR_COINBASE_ID`.
 - `PHONE_NUMBER` — placeholder phone number: `YOUR_PHONE_NUMBER`.
