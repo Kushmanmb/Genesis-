@@ -65,7 +65,19 @@ inline constexpr std::string_view INSTAGRAM_PROFILE = "https://www.instagram.com
 inline constexpr std::string_view COINBASE_ID = "Kushmanmb";
 
 // Phone number associated with the owner of this blockchain.
-inline constexpr std::string_view PHONE_NUMBER = "YOUR_PHONE_NUMBER";
+inline constexpr std::string_view PHONE_NUMBER_PLACEHOLDER = "YOUR_PHONE_NUMBER";
+
+inline std::string resolvePhoneNumber() {
+    if (const char *env = std::getenv("PHONE_NUMBER")) {
+        if (*env != '\0') {
+            return std::string(env);
+        }
+    }
+    return std::string(PHONE_NUMBER_PLACEHOLDER);
+}
+
+// Startup-time snapshot of the owner phone number.
+inline const std::string PHONE_NUMBER = resolvePhoneNumber();
 
 // Etherscan API key used for querying the Etherscan v2 API.
 inline constexpr std::string_view ETHERSCAN_API_KEY_PLACEHOLDER = "YOUR_ETHERSCAN_API_KEY";

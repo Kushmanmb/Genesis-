@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
+#include <cstdlib>
 #include <limits>
+#include <mutex>
 #include <type_traits>
 #include <sstream>
 #include "Block.h"
@@ -7,6 +9,62 @@
 #include "Logger.h"
 #include "Node.h"
 #include "Owners.h"
+
+namespace {
+inline void setEnvVar(const char *name, const char *value) {
+#if defined(_WIN32)
+    _putenv_s(name, value);
+#else
+    setenv(name, value, 1);
+#endif
+}
+
+inline void unsetEnvVar(const char *name) {
+#if defined(_WIN32)
+    _putenv_s(name, "");
+#else
+    unsetenv(name);
+#endif
+}
+
+class ScopedEnvVar {
+public:
+    explicit ScopedEnvVar(const char *name) : lock_(envMutex()), name_(name) {
+        const char *original = std::getenv(name_);
+        hadOriginal_ = (original != nullptr);
+        if (hadOriginal_) {
+            originalValue_ = original;
+        }
+    }
+
+    ~ScopedEnvVar() {
+        if (hadOriginal_) {
+            setEnvVar(name_, originalValue_.c_str());
+        } else {
+            unsetEnvVar(name_);
+        }
+    }
+
+    void set(const char *value) const {
+        setEnvVar(name_, value);
+    }
+
+    void unset() const {
+        unsetEnvVar(name_);
+    }
+
+private:
+    static std::mutex &envMutex() {
+        static std::mutex mutex;
+        return mutex;
+    }
+
+    std::unique_lock<std::mutex> lock_;
+    const char *name_;
+    bool hadOriginal_{false};
+    std::string originalValue_;
+};
+} // namespace
 
 // ---- Block immutability static checks ----------------------------------
 
@@ -933,5 +991,18 @@ TEST(OwnersTest, ProfileAndIdentityConstantsAreSet) {
     EXPECT_EQ(std::string(FACEBOOK_PROFILE), "https://www.facebook.com/Kushmanmb");
     EXPECT_EQ(std::string(INSTAGRAM_PROFILE), "https://www.instagram.com/Kushmanmb/");
     EXPECT_EQ(std::string(COINBASE_ID), "Kushmanmb");
-    EXPECT_EQ(std::string(PHONE_NUMBER), "YOUR_PHONE_NUMBER");
+    EXPECT_EQ(std::string(PHONE_NUMBER_PLACEHOLDER), "YOUR_PHONE_NUMBER");
+    EXPECT_FALSE(PHONE_NUMBER.empty());
+}
+
+TEST(OwnersTest, ResolvePhoneNumberFallsBackToPlaceholderWhenUnset) {
+    const ScopedEnvVar env("PHONE_NUMBER");
+    env.unset();
+    EXPECT_EQ(resolvePhoneNumber(), std::string(PHONE_NUMBER_PLACEHOLDER));
+}
+
+TEST(OwnersTest, ResolvePhoneNumberUsesEnvironmentWhenSet) {
+    const ScopedEnvVar env("PHONE_NUMBER");
+    env.set("+1234567890");
+    EXPECT_EQ(resolvePhoneNumber(), "+1234567890");
 }
