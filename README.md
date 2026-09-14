@@ -50,7 +50,7 @@ Block #2
 
 ## Owner Identity Constants (`Owners.h`)
 
-- `OWNER_ADDRESSES` — list of owner identifiers with owner-level permissions (currently `Yaketh.eth`).
+- `OWNER_ADDRESSES` — array of owner identifiers with owner-level permissions (currently containing one entry: `Yaketh.eth`).
 - `SOCIAL_PROFILE` — placeholder GitHub profile URL: `https://github.com/YOUR_PROFILE`.
 - `FACEBOOK_PROFILE` — placeholder Facebook profile URL: `https://www.facebook.com/YOUR_PROFILE`.
 - `INSTAGRAM_PROFILE` — placeholder Instagram profile URL: `https://www.instagram.com/YOUR_PROFILE/`.
