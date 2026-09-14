@@ -13,11 +13,11 @@ int main() {
     // Blockchain instance for demonstrating block operations.
     Blockchain bc;
 
-    // Add blocks anonymously — no contributors are configured.
+    // Add blocks anonymously.
     bc.addBlock("Block 1 data");
     bc.addBlock("Block 2 data");
 
-    // Demonstrate that all owner-gated operations are rejected (no contributors).
+    // Demonstrate that owner-gated operations reject non-owner callers.
     try {
         bc.addBlock("Block 3 data", "0x0000000000000000000000000000000000000000");
     } catch (const std::runtime_error &e) {
@@ -76,8 +76,7 @@ int main() {
     std::cout << "\nSocial profile validated on chain: " << (validated ? "yes" : "no") << "\n";
     std::cout << "Profile: " << SOCIAL_PROFILE << "\n";
 
-    // Demonstrate announce: owner-gated operations are rejected when OWNER_ADDRESSES
-    // is empty, but the error path is shown here.
+    // Demonstrate announce rejection for a non-owner caller.
     try {
         bc.announce("Genesis blockchain is now live!", "0x0000000000000000000000000000000000000000");
     } catch (const std::runtime_error &e) {
@@ -105,4 +104,3 @@ int main() {
 
     return 0;
 }
-

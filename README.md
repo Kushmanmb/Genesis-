@@ -50,7 +50,7 @@ Block #2
 
 ## Owner Identity Constants (`Owners.h`)
 
-- `OWNER_ADDRESSES` — list of Ethereum addresses with owner-level permissions (currently empty; all owner-gated operations are rejected).
+- Owner authorization uses exact-match address strings; entries may be hexadecimal wallet addresses or ENS names. The default owner is `Yaketh.eth`, and the `OWNER_ADDRESSES` environment variable can override it with a comma-separated list at runtime.
 - `SOCIAL_PROFILE` — placeholder GitHub profile URL: `https://github.com/YOUR_PROFILE`.
 - `FACEBOOK_PROFILE` — placeholder Facebook profile URL: `https://www.facebook.com/YOUR_PROFILE`.
 - `INSTAGRAM_PROFILE` — placeholder Instagram profile URL: `https://www.instagram.com/YOUR_PROFILE/`.
