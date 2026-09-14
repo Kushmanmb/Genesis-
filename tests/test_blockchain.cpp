@@ -192,6 +192,35 @@ TEST(BlockchainTest, ReturnToLegacyDeniedForAllCallers) {
     );
 }
 
+TEST(NodeTest, ReturnToLegacyThrowsWhenNodeNotRunning) {
+    Node node;
+    EXPECT_THROW(
+        node.returnToLegacy(
+            "Yaketh.eth",
+            "0xB29380d2FC97F857E1D7De0cB3F1E2b8dc5caf23"
+        ),
+        std::runtime_error
+    );
+}
+
+TEST(NodeTest, ReturnToLegacyAddsBlockForConfiguredOwnerWhenRunning) {
+    Node node;
+    const std::string legacyAddr = "0xB29380d2FC97F857E1D7De0cB3F1E2b8dc5caf23";
+    node.start();
+
+    ASSERT_EQ(node.fetchAll().size(), 1u);
+
+    node.returnToLegacy("Yaketh.eth", legacyAddr);
+
+    ASSERT_EQ(node.fetchAll().size(), 2u);
+    EXPECT_EQ(
+        node.fetchAll().back().getData(),
+        "Consolidate mytoken balances and return to legacy address (" +
+            legacyAddr + "): [Yaketh.eth]"
+    );
+    node.stop();
+}
+
 // ---- returnToOwner tests -----------------------------------------------
 
 TEST(BlockchainTest, ReturnToOwnerDeniedForAllCallers) {

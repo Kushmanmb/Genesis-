@@ -87,6 +87,16 @@ void Node::returnToOrigin(const std::string &callerAddress) {
     blockchain.returnToOrigin(callerAddress);
 }
 
+void Node::returnToLegacy(const std::string &callerAddress,
+                          const std::string &legacyAddress) {
+    if (!running) {
+        throw std::runtime_error("Node is not running");
+    }
+    LOG_DEBUG("Node::returnToLegacy caller=" + callerAddress +
+              " legacyAddress=" + legacyAddress);
+    blockchain.returnToLegacy(callerAddress, legacyAddress);
+}
+
 uint64_t Node::fetchLatestEthBlockNumber(const std::string &apiKey) {
     if (isUnsetOrPlaceholderApiKey(apiKey)) {
         throw std::invalid_argument(
