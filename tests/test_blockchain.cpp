@@ -930,7 +930,7 @@ TEST(OwnersTest, ParseOwnerAddressesSplitsAndTrimsCommaSeparatedValues) {
 
 TEST(OwnersTest, ProfileAndIdentityPlaceholdersAreSet) {
     EXPECT_EQ(std::string(SOCIAL_PROFILE), "https://github.com/Kushmanmb");
-    EXPECT_EQ(std::string(FACEBOOK_PROFILE), "https://www.facebook.com/YOUR_PROFILE");
+    EXPECT_EQ(std::string(FACEBOOK_PROFILE), "https://www.facebook.com/Kushmanmb");
     EXPECT_EQ(std::string(INSTAGRAM_PROFILE), "https://www.instagram.com/YOUR_PROFILE/");
     EXPECT_EQ(std::string(COINBASE_ID), "YOUR_COINBASE_ID");
     EXPECT_EQ(std::string(PHONE_NUMBER), "YOUR_PHONE_NUMBER");
