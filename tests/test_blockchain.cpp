@@ -790,7 +790,7 @@ TEST(NodeTest, ParseTokenSupplyResponseKnownContract) {
 // ---- Owners.h constant tests -------------------------------------------
 
 TEST(OwnersTest, EtherscanApiKeyIsSet) {
-    // Verify that the ETHERSCAN_API_KEY constant is non-empty and holds the expected key.
+    // Verify that the ETHERSCAN_API_KEY constant is set to the expected placeholder value.
     EXPECT_FALSE(std::string(ETHERSCAN_API_KEY).empty());
-    EXPECT_EQ(std::string(ETHERSCAN_API_KEY), "qu4g9niymiy7lacsmp6echxqdkjfgmkc3fskedyenzcyem9g8x");
+    EXPECT_EQ(std::string(ETHERSCAN_API_KEY), "YOUR_ETHERSCAN_API_KEY");
 }

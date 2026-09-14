@@ -10,22 +10,22 @@
 inline constexpr std::array<std::string_view, 0> OWNER_ADDRESSES = {};
 
 // Social profile associated with the owner of this blockchain.
-inline constexpr std::string_view SOCIAL_PROFILE = "https://github.com/ghost";
+inline constexpr std::string_view SOCIAL_PROFILE = "https://github.com/Kushmanmb";
 
 // Facebook profile associated with the owner of this blockchain.
-inline constexpr std::string_view FACEBOOK_PROFILE = "https://www.facebook.com/Kushmanmb23/";
+inline constexpr std::string_view FACEBOOK_PROFILE = "https://www.facebook.com/";
 
 // Instagram profile associated with the owner of this blockchain.
-inline constexpr std::string_view INSTAGRAM_PROFILE = "https://www.instagram.com/kushmanmb/";
+inline constexpr std::string_view INSTAGRAM_PROFILE = "https://www.instagram.com/";
 
 // Coinbase ID associated with the owner of this blockchain.
-inline constexpr std::string_view COINBASE_ID = "kushman.cb.id";
+inline constexpr std::string_view COINBASE_ID = "YOUR_COINBASE_ID";
 
 // Phone number associated with the owner of this blockchain.
-inline constexpr std::string_view PHONE_NUMBER = "18542123378";
+inline constexpr std::string_view PHONE_NUMBER = "YOUR_PHONE_NUMBER";
 
 // Etherscan API key used for querying the Etherscan v2 API.
-inline constexpr std::string_view ETHERSCAN_API_KEY = "qu4g9niymiy7lacsmp6echxqdkjfgmkc3fskedyenzcyem9g8x";
+inline constexpr std::string_view ETHERSCAN_API_KEY = "YOUR_ETHERSCAN_API_KEY";
 
 // Returns true when `address` matches one of the configured owner addresses
 // (case-sensitive, as Ethereum checksummed addresses are case-sensitive).

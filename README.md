@@ -46,17 +46,17 @@ Block #2
 - `announce(message, callerAddress)` — records "Announcement: <message>" as a block on the chain; `callerAddress` must be an authorised owner.
 - `fetchAll()` — returns a const reference to the full vector of blocks.
 - `fetchAllFrom(identifier)` — returns a copy of all blocks whose data field contains `identifier`.
-- `validateSocialProfile()` — records the owner's `SOCIAL_PROFILE` URL (`https://github.com/ghost`) as a block on the chain and returns `true` once the profile is confirmed to be present in the chain.
+- `validateSocialProfile()` — records the owner's `SOCIAL_PROFILE` URL (`https://github.com/Kushmanmb`) as a block on the chain and returns `true` once the profile is confirmed to be present in the chain.
 
 ## Owner Identity Constants (`Owners.h`)
 
 - `OWNER_ADDRESSES` — list of Ethereum addresses with owner-level permissions (currently empty; all owner-gated operations are rejected).
-- `SOCIAL_PROFILE` — owner's GitHub profile: `https://github.com/ghost`.
-- `FACEBOOK_PROFILE` — owner's Facebook profile: `https://www.facebook.com/Kushmanmb23/`.
-- `INSTAGRAM_PROFILE` — owner's Instagram profile: `https://www.instagram.com/kushmanmb/`.
-- `COINBASE_ID` — owner's Coinbase ID: `kushman.cb.id`.
-- `PHONE_NUMBER` — owner's phone number: `18542123378`.
-- `ETHERSCAN_API_KEY` — Etherscan API key used for querying the Etherscan v2 API. See [`docs/etherscan-api.md`](docs/etherscan-api.md) for usage details.
+- `SOCIAL_PROFILE` — owner's GitHub profile: `https://github.com/Kushmanmb`.
+- `FACEBOOK_PROFILE` — owner Facebook root URL placeholder: `https://www.facebook.com/`.
+- `INSTAGRAM_PROFILE` — owner Instagram root URL placeholder: `https://www.instagram.com/`.
+- `COINBASE_ID` — placeholder Coinbase ID: `YOUR_COINBASE_ID`.
+- `PHONE_NUMBER` — placeholder phone number: `YOUR_PHONE_NUMBER`.
+- `ETHERSCAN_API_KEY` — placeholder API key string. Replace it locally with your real key before Etherscan API calls. See [`./docs/etherscan-api.md`](./docs/etherscan-api.md) for usage details.
 
 ## Immutability
 
