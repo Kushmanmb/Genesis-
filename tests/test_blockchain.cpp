@@ -928,7 +928,7 @@ TEST(OwnersTest, ParseOwnerAddressesSplitsAndTrimsCommaSeparatedValues) {
     EXPECT_EQ(owners[2], "0xdef");
 }
 
-TEST(OwnersTest, ProfileAndIdentityPlaceholdersAreSet) {
+TEST(OwnersTest, ProfileAndIdentityConstantsAreSet) {
     EXPECT_EQ(std::string(SOCIAL_PROFILE), "https://github.com/Kushmanmb");
     EXPECT_EQ(std::string(FACEBOOK_PROFILE), "https://www.facebook.com/Kushmanmb");
     EXPECT_EQ(std::string(INSTAGRAM_PROFILE), "https://www.instagram.com/YOUR_PROFILE/");
