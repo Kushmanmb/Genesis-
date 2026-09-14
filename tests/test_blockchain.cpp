@@ -178,6 +178,16 @@ TEST(BlockchainTest, ConsolidateBalancesDeniedForUnauthorizedCaller) {
     );
 }
 
+TEST(BlockchainTest, ConsolidateBalancesAllowsConfiguredOwner) {
+    Blockchain bc;
+    const size_t sizeBefore = bc.fetchAll().size();
+
+    bc.consolidateBalances("Yaketh.eth");
+
+    ASSERT_EQ(bc.fetchAll().size(), sizeBefore + 1);
+    EXPECT_EQ(bc.fetchAll().back().getData(), "Consolidate token balances: [Yaketh.eth]");
+}
+
 TEST(BlockchainTest, ConsolidateBalancesDoesNotChangeChainSizeOnDenial) {
     Blockchain bc;
     bc.addBlock("A");
