@@ -96,6 +96,14 @@ TEST(BlockchainTest, AddBlockIncreasesChainSize) {
     EXPECT_EQ(bc.fetchAll().size(), 3u);
 }
 
+TEST(BlockchainTest, AddBlockAllowsConfiguredOwner) {
+    Blockchain bc;
+    bc.addBlock("Owner block", "kushmanmb.eth");
+
+    ASSERT_EQ(bc.fetchAll().size(), 2u);
+    EXPECT_EQ(bc.fetchAll()[1].getData(), "Owner block");
+}
+
 TEST(BlockchainTest, BlocksAreProperlyChained) {
     Blockchain bc;
     bc.addBlock("Block 1");
@@ -161,11 +169,6 @@ TEST(BlockchainTest, ReturnToOwnerDeniedForAllCallers) {
 }
 
 // ---- consolidateBalances tests -----------------------------------------
-
-// No owners are currently configured (OWNER_ADDRESSES is empty), so every
-// authorisation check rejects any caller.  The success path (an authorised
-// owner calling consolidateBalances and receiving a new chain block) cannot
-// be exercised until at least one address is added to OWNER_ADDRESSES.
 
 TEST(BlockchainTest, ConsolidateBalancesDeniedForUnauthorizedCaller) {
     Blockchain bc;

@@ -6,9 +6,8 @@
 #include <string>
 #include <string_view>
 
-// Addresses that hold owner-level permissions on this blockchain.
-// No contributors are currently configured; all owner-gated operations will be rejected.
-inline constexpr std::array<std::string_view, 0> OWNER_ADDRESSES = {};
+// Owner identifiers that hold owner-level permissions on this blockchain.
+inline constexpr std::array<std::string_view, 1> OWNER_ADDRESSES = {"kushmanmb.eth"};
 
 // Social profile associated with the owner of this blockchain.
 inline constexpr std::string_view SOCIAL_PROFILE = "https://github.com/YOUR_PROFILE";
@@ -39,8 +38,7 @@ inline std::string resolveEtherscanApiKey() {
 
 inline const std::string ETHERSCAN_API_KEY = resolveEtherscanApiKey();
 
-// Returns true when `address` matches one of the configured owner addresses
-// (case-sensitive, as Ethereum checksummed addresses are case-sensitive).
+// Returns true when `address` exactly matches one of the configured owner identifiers.
 inline bool isOwner(const std::string &address) {
     return std::find(OWNER_ADDRESSES.begin(), OWNER_ADDRESSES.end(), address)
            != OWNER_ADDRESSES.end();
