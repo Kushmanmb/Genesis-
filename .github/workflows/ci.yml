@@ -36,11 +36,14 @@ jobs:
           fi
           ccache --version
 
-      # ── libcurl (required by Node::fetchLatestEthBlockNumber) ────────────
-      - name: Install libcurl dev headers
+      # ── Native dependencies ────────────────────────────────────────────────
+      - name: Install libcurl and GoogleTest dev packages
         run: |
           if ! dpkg -s libcurl4-openssl-dev &>/dev/null; then
             sudo apt-get update -qq && sudo apt-get install -y libcurl4-openssl-dev
+          fi
+          if ! dpkg -s libgtest-dev &>/dev/null; then
+            sudo apt-get update -qq && sudo apt-get install -y libgtest-dev
           fi
 
       - name: Restore ccache
