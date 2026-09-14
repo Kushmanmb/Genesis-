@@ -810,6 +810,29 @@ TEST(NodeTest, FetchTokenSupplyRejectsPlaceholderApiKey) {
     );
 }
 
+TEST(NodeTest, FetchEthCallRejectsEmptyContractAddress) {
+    EXPECT_THROW(
+        static_cast<void>(Node::fetchEthCall("", "0x18160ddd", "some_key")),
+        std::invalid_argument
+    );
+}
+
+TEST(NodeTest, FetchEthCallRejectsEmptyCallData) {
+    EXPECT_THROW(
+        static_cast<void>(Node::fetchEthCall("0xC02aaA39b223FE8D0A0E5C4F27eAD9083C756Cc2", "", "some_key")),
+        std::invalid_argument
+    );
+}
+
+TEST(NodeTest, FetchEthCallRejectsPlaceholderApiKey) {
+    EXPECT_THROW(
+        static_cast<void>(Node::fetchEthCall("0xC02aaA39b223FE8D0A0E5C4F27eAD9083C756Cc2",
+                                             "0x18160ddd",
+                                             std::string(ETHERSCAN_API_KEY_PLACEHOLDER))),
+        std::invalid_argument
+    );
+}
+
 // ---- Node::parseEthBlockNumberResponse tests ---------------------------
 
 TEST(NodeTest, ParseEthBlockNumberResponseTypicalHex) {
@@ -965,6 +988,43 @@ TEST(NodeTest, ParseTokenSupplyResponseKnownContract) {
     const std::string response =
         R"({"status":"1","message":"OK","result":"21265524714464496430135228"})";
     EXPECT_EQ(Node::parseTokenSupplyResponse(response), "21265524714464496430135228");
+}
+
+// ---- Node::parseEthCallResponse tests ----------------------------------
+
+TEST(NodeTest, ParseEthCallResponseTypicalHex) {
+    const std::string response =
+        R"({"jsonrpc":"2.0","id":1,"result":"0x0000000000000000000000000000000000000000000000000000000000000001"})";
+    EXPECT_EQ(Node::parseEthCallResponse(response),
+              "0x0000000000000000000000000000000000000000000000000000000000000001");
+}
+
+TEST(NodeTest, ParseEthCallResponseZeroWord) {
+    const std::string response =
+        R"({"jsonrpc":"2.0","id":1,"result":"0x0000000000000000000000000000000000000000000000000000000000000000"})";
+    EXPECT_EQ(Node::parseEthCallResponse(response),
+              "0x0000000000000000000000000000000000000000000000000000000000000000");
+}
+
+TEST(NodeTest, ParseEthCallResponseMissingResultThrows) {
+    const std::string response =
+        R"({"jsonrpc":"2.0","id":1,"error":{"code":-32000,"message":"execution reverted"}})";
+    EXPECT_THROW(static_cast<void>(Node::parseEthCallResponse(response)), std::runtime_error);
+}
+
+TEST(NodeTest, ParseEthCallResponseEmptyStringThrows) {
+    EXPECT_THROW(static_cast<void>(Node::parseEthCallResponse("")), std::runtime_error);
+}
+
+TEST(NodeTest, ParseEthCallResponseEmptyResultValueThrows) {
+    const std::string response =
+        R"({"jsonrpc":"2.0","id":1,"result":""})";
+    EXPECT_THROW(static_cast<void>(Node::parseEthCallResponse(response)), std::runtime_error);
+}
+
+TEST(NodeTest, ParseEthCallResponseUnterminatedResultThrows) {
+    const std::string response = R"({"jsonrpc":"2.0","id":1,"result":"0x1234)";
+    EXPECT_THROW(static_cast<void>(Node::parseEthCallResponse(response)), std::runtime_error);
 }
 
 // ---- Owners.h constant tests -------------------------------------------

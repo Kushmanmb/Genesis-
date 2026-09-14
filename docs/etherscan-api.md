@@ -1,6 +1,6 @@
 # Using the Etherscan API with curl
 
-This document explains how to query the [Etherscan v2 API](https://docs.etherscan.io/) using `curl` from the command line, with a focus on the `addresstokenbalance` endpoint used in this project.
+This document explains how to query the [Etherscan v2 API](https://docs.etherscan.io/) using `curl` from the command line, with a focus on the `addresstokenbalance` and `eth_call` endpoints used in this project.
 
 ---
 
@@ -11,6 +11,14 @@ curl "https://api.etherscan.io/v2/api?chainid=1&module=account&action=addresstok
 ```
 
 Replace `YourApiKeyToken` with your actual Etherscan API key before running the command (see [Obtaining an API Key](#obtaining-an-api-key) below).
+
+### `eth_call` Example Request
+
+```bash
+curl "https://api.etherscan.io/v2/api?chainid=1&module=proxy&action=eth_call&to=0xC02aaA39b223FE8D0A0E5C4F27eAD9083C756Cc2&data=0x18160ddd&tag=latest&apikey=YourApiKeyToken"
+```
+
+This example calls the ERC-20 `totalSupply()` selector (`0x18160ddd`) on WETH and returns the ABI-encoded hex result.
 
 ---
 
@@ -103,6 +111,18 @@ When the request fails (e.g. invalid address, missing API key), `status` is `"0"
   "status": "0",
   "message": "NOTOK",
   "result": "Error! Missing or invalid action name"
+}
+```
+
+### `eth_call` Response
+
+A successful `eth_call` response returns a JSON-RPC payload whose `result` field contains the ABI-encoded hex return value:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": "0x00000000000000000000000000000000000000000000000000601d8888141c00"
 }
 ```
 
