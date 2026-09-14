@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <cstdlib>
 #include <limits>
+#include <mutex>
 #include <type_traits>
 #include <sstream>
 #include "Block.h"
@@ -28,7 +29,7 @@ inline void unsetEnvVar(const char *name) {
 
 class ScopedEnvVar {
 public:
-    explicit ScopedEnvVar(const char *name) : name_(name) {
+    explicit ScopedEnvVar(const char *name) : lock_(envMutex()), name_(name) {
         const char *original = std::getenv(name_);
         hadOriginal_ = (original != nullptr);
         if (hadOriginal_) {
@@ -53,6 +54,12 @@ public:
     }
 
 private:
+    static std::mutex &envMutex() {
+        static std::mutex mutex;
+        return mutex;
+    }
+
+    std::unique_lock<std::mutex> lock_;
     const char *name_;
     bool hadOriginal_{false};
     std::string originalValue_;
