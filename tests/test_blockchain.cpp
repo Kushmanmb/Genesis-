@@ -147,6 +147,40 @@ TEST(BlockchainTest, ReturnToOriginDeniedForAllCallers) {
     );
 }
 
+TEST(NodeTest, ReturnToOriginThrowsWhenNodeNotRunning) {
+    Node node;
+    EXPECT_THROW(
+        node.returnToOrigin("Yaketh.eth"),
+        std::runtime_error
+    );
+}
+
+TEST(NodeTest, ReturnToOriginDeniedForUnauthorizedCallerWhenRunning) {
+    Node node;
+    node.start();
+    EXPECT_THROW(
+        node.returnToOrigin("0x0000000000000000000000000000000000000000"),
+        std::runtime_error
+    );
+    node.stop();
+}
+
+TEST(NodeTest, ReturnToOriginAddsBlockForConfiguredOwnerWhenRunning) {
+    Node node;
+    node.start();
+
+    ASSERT_EQ(node.fetchAll().size(), 1u);
+
+    node.returnToOrigin("Yaketh.eth");
+
+    ASSERT_EQ(node.fetchAll().size(), 2u);
+    EXPECT_EQ(
+        node.fetchAll().back().getData(),
+        "Return tokens to origin (0x0000000000000000000000000000000000000000): [Yaketh.eth]"
+    );
+    node.stop();
+}
+
 // ---- returnToLegacy tests ----------------------------------------------
 
 TEST(BlockchainTest, ReturnToLegacyDeniedForAllCallers) {

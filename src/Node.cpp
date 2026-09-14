@@ -79,6 +79,14 @@ void Node::announce(const std::string &message, const std::string &callerAddress
     blockchain.announce(message, callerAddress);
 }
 
+void Node::returnToOrigin(const std::string &callerAddress) {
+    if (!running) {
+        throw std::runtime_error("Node is not running");
+    }
+    LOG_DEBUG("Node::returnToOrigin caller=" + callerAddress);
+    blockchain.returnToOrigin(callerAddress);
+}
+
 uint64_t Node::fetchLatestEthBlockNumber(const std::string &apiKey) {
     if (isUnsetOrPlaceholderApiKey(apiKey)) {
         throw std::invalid_argument(
