@@ -62,7 +62,7 @@ inline constexpr std::string_view FACEBOOK_PROFILE = "https://www.facebook.com/K
 inline constexpr std::string_view INSTAGRAM_PROFILE = "https://www.instagram.com/Kushmanmb/";
 
 // Coinbase ID associated with the owner of this blockchain.
-inline constexpr std::string_view COINBASE_ID = "YOUR_COINBASE_ID";
+inline constexpr std::string_view COINBASE_ID = "Kushmanmb";
 
 // Phone number associated with the owner of this blockchain.
 inline constexpr std::string_view PHONE_NUMBER = "YOUR_PHONE_NUMBER";
