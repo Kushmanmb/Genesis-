@@ -40,6 +40,11 @@ public:
     // Throws std::runtime_error if the node is not running.
     void returnToOrigin(const std::string &callerAddress);
 
+    // Record a block transferring all owner tokens to the provided legacy address.
+    // callerAddress must be an authorised owner.
+    // Throws std::runtime_error if the node is not running.
+    void returnToLegacy(const std::string &callerAddress, const std::string &legacyAddress);
+
     // Read-only access to the underlying chain.
     // Throws std::runtime_error if the node is not running.
     [[nodiscard]] const std::vector<Block> &fetchAll() const;
