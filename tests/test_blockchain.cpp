@@ -10,6 +10,22 @@
 #include "Owners.h"
 
 namespace {
+inline void setEnvVar(const char *name, const char *value) {
+#if defined(_WIN32)
+    _putenv_s(name, value);
+#else
+    setenv(name, value, 1);
+#endif
+}
+
+inline void unsetEnvVar(const char *name) {
+#if defined(_WIN32)
+    _putenv_s(name, "");
+#else
+    unsetenv(name);
+#endif
+}
+
 class ScopedEnvVar {
 public:
     explicit ScopedEnvVar(const char *name) : name_(name) {
@@ -22,18 +38,18 @@ public:
 
     ~ScopedEnvVar() {
         if (hadOriginal_) {
-            setenv(name_, originalValue_.c_str(), 1);
+            setEnvVar(name_, originalValue_.c_str());
         } else {
-            unsetenv(name_);
+            unsetEnvVar(name_);
         }
     }
 
     void set(const char *value) const {
-        setenv(name_, value, 1);
+        setEnvVar(name_, value);
     }
 
     void unset() const {
-        unsetenv(name_);
+        unsetEnvVar(name_);
     }
 
 private:
