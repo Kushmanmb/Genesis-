@@ -54,7 +54,7 @@ Block #2
 - `SOCIAL_PROFILE` — configured GitHub profile URL: `https://github.com/Kushmanmb`.
 - `FACEBOOK_PROFILE` — configured Facebook profile URL: `https://www.facebook.com/Kushmanmb`.
 - `INSTAGRAM_PROFILE` — configured Instagram profile URL: `https://www.instagram.com/Kushmanmb/`.
-- `COINBASE_ID` — placeholder Coinbase ID: `YOUR_COINBASE_ID`.
+- `COINBASE_ID` — configured Coinbase ID: `Kushmanmb`.
 - `PHONE_NUMBER` — placeholder phone number: `YOUR_PHONE_NUMBER`.
 - `ETHERSCAN_API_KEY` — runtime API key string resolved from the `ETHERSCAN_API_KEY` environment variable, or a placeholder when the variable is unset. See [`./docs/etherscan-api.md`](./docs/etherscan-api.md) for usage details.
 
