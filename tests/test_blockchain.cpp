@@ -98,7 +98,7 @@ TEST(BlockchainTest, AddBlockIncreasesChainSize) {
 
 TEST(BlockchainTest, AddBlockAllowsConfiguredOwner) {
     Blockchain bc;
-    bc.addBlock("Owner block", "kushmanmb.eth");
+    bc.addBlock("Owner block", "Yaketh.eth");
 
     ASSERT_EQ(bc.fetchAll().size(), 2u);
     EXPECT_EQ(bc.fetchAll()[1].getData(), "Owner block");

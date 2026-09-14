@@ -7,7 +7,7 @@
 #include <string_view>
 
 // Owner identifiers that hold owner-level permissions on this blockchain.
-inline constexpr std::array<std::string_view, 1> OWNER_ADDRESSES = {"kushmanmb.eth"};
+inline constexpr std::array<std::string_view, 1> OWNER_ADDRESSES = {"Yaketh.eth"};
 
 // Social profile associated with the owner of this blockchain.
 inline constexpr std::string_view SOCIAL_PROFILE = "https://github.com/YOUR_PROFILE";
