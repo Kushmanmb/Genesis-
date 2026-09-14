@@ -2,11 +2,11 @@
   "name": "genesis-wasm",
   "version": "0.1.0",
   "private": true,
-  "description": "WebAssembly bindings for PDF text extraction and verification",
+  "description": "WebAssembly bindings for PDF text extraction and verification (requires the Rust toolchain with cargo)",
   "scripts": {
-    "build": "cargo build --release",
-    "build:wasm": "cargo build --release --target wasm32-unknown-unknown",
-    "test": "cargo test"
+    "build": "sh -c 'command -v cargo >/dev/null 2>&1 || { echo \"Rust toolchain with cargo is required.\"; exit 1; }; cargo build --release'",
+    "build:wasm": "sh -c 'command -v cargo >/dev/null 2>&1 || { echo \"Rust toolchain with cargo is required.\"; exit 1; }; cargo build --release --target wasm32-unknown-unknown'",
+    "test": "sh -c 'command -v cargo >/dev/null 2>&1 || { echo \"Rust toolchain with cargo is required.\"; exit 1; }; cargo test'"
   },
   "keywords": [
     "wasm",
