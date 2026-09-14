@@ -12,6 +12,21 @@ static std::size_t curlWriteCallback(char *ptr, std::size_t size,
     return size * nmemb;
 }
 
+static std::string urlEncode(CURL *curl, const std::string &value) {
+    char *encoded = curl_easy_escape(curl, value.c_str(), static_cast<int>(value.size()));
+    if (!encoded) {
+        throw std::runtime_error("Failed to URL-encode request parameter");
+    }
+
+    std::string result(encoded);
+    curl_free(encoded);
+    return result;
+}
+
+static bool isUnsetOrPlaceholderApiKey(const std::string &apiKey) {
+    return apiKey.empty() || apiKey == std::string(ETHERSCAN_API_KEY_PLACEHOLDER);
+}
+
 Node::Node() : running(false) {}
 
 void Node::start() {
@@ -65,9 +80,10 @@ void Node::announce(const std::string &message, const std::string &callerAddress
 }
 
 uint64_t Node::fetchLatestEthBlockNumber(const std::string &apiKey) {
-    const std::string url =
-        "https://api.etherscan.io/v2/api"
-        "?chainid=1&module=proxy&action=eth_blockNumber&apikey=" + apiKey;
+    if (isUnsetOrPlaceholderApiKey(apiKey)) {
+        throw std::invalid_argument(
+            "fetchLatestEthBlockNumber: apiKey is not configured");
+    }
 
     // RAII wrapper ensures curl_easy_cleanup is called even if an exception is thrown.
     std::unique_ptr<CURL, decltype(&curl_easy_cleanup)> curl(
@@ -75,6 +91,10 @@ uint64_t Node::fetchLatestEthBlockNumber(const std::string &apiKey) {
     if (!curl) {
         throw std::runtime_error("fetchLatestEthBlockNumber: failed to initialize libcurl");
     }
+
+    const std::string url =
+        "https://api.etherscan.io/v2/api"
+        "?chainid=1&module=proxy&action=eth_blockNumber&apikey=" + urlEncode(curl.get(), apiKey);
 
     std::string response;
     curl_easy_setopt(curl.get(), CURLOPT_URL, url.c_str());
@@ -127,10 +147,12 @@ uint64_t Node::parseEthBlockNumberResponse(const std::string &response) {
 }
 
 std::string Node::fetchEthBalance(const std::string &address, const std::string &apiKey) {
-    const std::string url =
-        "https://api.etherscan.io/v2/api"
-        "?chainid=1&module=account&action=balance&address=" + address +
-        "&tag=latest&apikey=" + apiKey;
+    if (address.empty()) {
+        throw std::invalid_argument("fetchEthBalance: address must not be empty");
+    }
+    if (isUnsetOrPlaceholderApiKey(apiKey)) {
+        throw std::invalid_argument("fetchEthBalance: apiKey is not configured");
+    }
 
     // RAII wrapper ensures curl_easy_cleanup is called even if an exception is thrown.
     std::unique_ptr<CURL, decltype(&curl_easy_cleanup)> curl(
@@ -138,6 +160,13 @@ std::string Node::fetchEthBalance(const std::string &address, const std::string 
     if (!curl) {
         throw std::runtime_error("fetchEthBalance: failed to initialize libcurl");
     }
+
+    const std::string encodedAddress = urlEncode(curl.get(), address);
+    const std::string encodedApiKey = urlEncode(curl.get(), apiKey);
+    const std::string url =
+        "https://api.etherscan.io/v2/api"
+        "?chainid=1&module=account&action=balance&address=" + encodedAddress +
+        "&tag=latest&apikey=" + encodedApiKey;
 
     std::string response;
     curl_easy_setopt(curl.get(), CURLOPT_URL, url.c_str());
@@ -185,10 +214,12 @@ std::string Node::parseEthBalanceResponse(const std::string &response) {
 
 std::string Node::fetchTokenSupply(const std::string &contractAddress,
                                    const std::string &apiKey) {
-    const std::string url =
-        "https://api.etherscan.io/v2/api"
-        "?chainid=1&module=stats&action=tokensupply&contractaddress=" + contractAddress +
-        "&apikey=" + apiKey;
+    if (contractAddress.empty()) {
+        throw std::invalid_argument("fetchTokenSupply: contractAddress must not be empty");
+    }
+    if (isUnsetOrPlaceholderApiKey(apiKey)) {
+        throw std::invalid_argument("fetchTokenSupply: apiKey is not configured");
+    }
 
     // RAII wrapper ensures curl_easy_cleanup is called even if an exception is thrown.
     std::unique_ptr<CURL, decltype(&curl_easy_cleanup)> curl(
@@ -196,6 +227,13 @@ std::string Node::fetchTokenSupply(const std::string &contractAddress,
     if (!curl) {
         throw std::runtime_error("fetchTokenSupply: failed to initialize libcurl");
     }
+
+    const std::string encodedContractAddress = urlEncode(curl.get(), contractAddress);
+    const std::string encodedApiKey = urlEncode(curl.get(), apiKey);
+    const std::string url =
+        "https://api.etherscan.io/v2/api"
+        "?chainid=1&module=stats&action=tokensupply&contractaddress=" + encodedContractAddress +
+        "&apikey=" + encodedApiKey;
 
     std::string response;
     curl_easy_setopt(curl.get(), CURLOPT_URL, url.c_str());
