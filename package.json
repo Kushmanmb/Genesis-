@@ -1,0 +1,18 @@
+{
+  "name": "genesis-wasm",
+  "version": "0.1.0",
+  "private": true,
+  "description": "WebAssembly bindings for PDF text extraction and verification (requires the Rust toolchain with cargo)",
+  "scripts": {
+    "cargo": "node -e \"const { spawnSync } = require('node:child_process'); const args = process.argv.slice(1); const result = spawnSync('cargo', args, { stdio: 'inherit' }); if (result.error && result.error.code === 'ENOENT') { console.error('Rust toolchain with cargo is required.'); process.exit(1); } if (result.error) { console.error(result.error.message); process.exit(1); } process.exit(result.status ?? 1);\"",
+    "build": "npm run cargo -- build --release",
+    "build:wasm": "npm run cargo -- build --release --target wasm32-unknown-unknown",
+    "test": "npm run cargo -- test"
+  },
+  "keywords": [
+    "wasm",
+    "pdf",
+    "rust"
+  ],
+  "license": "UNLICENSED"
+}
