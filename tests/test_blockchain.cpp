@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <cstdlib>
 #include <limits>
 #include <type_traits>
 #include <sstream>
@@ -933,5 +934,36 @@ TEST(OwnersTest, ProfileAndIdentityConstantsAreSet) {
     EXPECT_EQ(std::string(FACEBOOK_PROFILE), "https://www.facebook.com/Kushmanmb");
     EXPECT_EQ(std::string(INSTAGRAM_PROFILE), "https://www.instagram.com/Kushmanmb/");
     EXPECT_EQ(std::string(COINBASE_ID), "Kushmanmb");
-    EXPECT_EQ(std::string(PHONE_NUMBER), "YOUR_PHONE_NUMBER");
+    EXPECT_EQ(std::string(PHONE_NUMBER_PLACEHOLDER), "YOUR_PHONE_NUMBER");
+    EXPECT_FALSE(PHONE_NUMBER.empty());
+}
+
+TEST(OwnersTest, ResolvePhoneNumberFallsBackToPlaceholderWhenUnset) {
+    const char *original = std::getenv("PHONE_NUMBER");
+    const std::string originalValue = original ? std::string(original) : std::string();
+    const bool hadOriginal = original != nullptr;
+
+    unsetenv("PHONE_NUMBER");
+    EXPECT_EQ(resolvePhoneNumber(), std::string(PHONE_NUMBER_PLACEHOLDER));
+
+    if (hadOriginal) {
+        setenv("PHONE_NUMBER", originalValue.c_str(), 1);
+    } else {
+        unsetenv("PHONE_NUMBER");
+    }
+}
+
+TEST(OwnersTest, ResolvePhoneNumberUsesEnvironmentWhenSet) {
+    const char *original = std::getenv("PHONE_NUMBER");
+    const std::string originalValue = original ? std::string(original) : std::string();
+    const bool hadOriginal = original != nullptr;
+
+    setenv("PHONE_NUMBER", "+1234567890", 1);
+    EXPECT_EQ(resolvePhoneNumber(), "+1234567890");
+
+    if (hadOriginal) {
+        setenv("PHONE_NUMBER", originalValue.c_str(), 1);
+    } else {
+        unsetenv("PHONE_NUMBER");
+    }
 }
