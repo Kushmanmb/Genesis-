@@ -91,6 +91,21 @@ public:
     // the result value is empty.
     [[nodiscard]] static std::string parseTokenSupplyResponse(const std::string &response);
 
+    // Query the Etherscan v2 API for an Ethereum JSON-RPC eth_call on Ethereum mainnet.
+    // Performs an HTTP GET to:
+    //   https://api.etherscan.io/v2/api?chainid=1&module=proxy&action=eth_call&to=<contractAddress>&data=<callData>&tag=latest&apikey=<apiKey>
+    // Returns the raw hex-encoded result string.
+    // Throws std::runtime_error on network failure or an unexpected response.
+    [[nodiscard]] static std::string fetchEthCall(const std::string &contractAddress,
+                                                  const std::string &callData,
+                                                  const std::string &apiKey);
+
+    // Parse an Etherscan eth_call JSON response and return the raw hex-encoded result.
+    // Expected format: {"jsonrpc":"2.0","id":1,"result":"0x<hex>"}
+    // Throws std::runtime_error if the response is missing the "result" field or
+    // the result value is empty.
+    [[nodiscard]] static std::string parseEthCallResponse(const std::string &response);
+
 private:
     Blockchain blockchain;
     bool       running;

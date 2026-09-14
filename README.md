@@ -48,6 +48,13 @@ Block #2
 - `fetchAllFrom(identifier)` — returns a copy of all blocks whose data field contains `identifier`.
 - `validateSocialProfile()` — records the owner's `SOCIAL_PROFILE` URL (`https://github.com/Kushmanmb`) as a block on the chain and returns `true` once the profile is confirmed to be present in the chain.
 
+## Node Etherscan Helpers
+
+- `Node::fetchLatestEthBlockNumber(apiKey)` — queries the latest Ethereum mainnet block number via Etherscan's proxy API.
+- `Node::fetchEthBalance(address, apiKey)` — queries the ETH balance for an address and returns the wei balance as a decimal string.
+- `Node::fetchTokenSupply(contractAddress, apiKey)` — queries an ERC-20 token supply and returns the raw decimal supply string.
+- `Node::fetchEthCall(contractAddress, callData, apiKey)` — performs an Etherscan-backed `eth_call` against a contract and returns the raw hex-encoded result.
+
 ## Owner Identity Constants (`Owners.h`)
 
 - Owner authorization uses exact-match address strings; entries may be hexadecimal wallet addresses or ENS names. The default owner is `Yaketh.eth`, and the `OWNER_ADDRESSES` environment variable can override it with a comma-separated list at runtime.

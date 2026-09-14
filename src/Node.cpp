@@ -296,3 +296,74 @@ std::string Node::parseTokenSupplyResponse(const std::string &response) {
 
     return supply;
 }
+
+std::string Node::fetchEthCall(const std::string &contractAddress,
+                               const std::string &callData,
+                               const std::string &apiKey) {
+    if (contractAddress.empty()) {
+        throw std::invalid_argument("fetchEthCall: contractAddress must not be empty");
+    }
+    if (callData.empty()) {
+        throw std::invalid_argument("fetchEthCall: callData must not be empty");
+    }
+    if (isUnsetOrPlaceholderApiKey(apiKey)) {
+        throw std::invalid_argument("fetchEthCall: apiKey is not configured");
+    }
+
+    std::unique_ptr<CURL, decltype(&curl_easy_cleanup)> curl(
+        curl_easy_init(), curl_easy_cleanup);
+    if (!curl) {
+        throw std::runtime_error("fetchEthCall: failed to initialize libcurl");
+    }
+
+    const std::string encodedContractAddress = urlEncode(curl.get(), contractAddress);
+    const std::string encodedCallData = urlEncode(curl.get(), callData);
+    const std::string encodedApiKey = urlEncode(curl.get(), apiKey);
+    const std::string url =
+        "https://api.etherscan.io/v2/api"
+        "?chainid=1&module=proxy&action=eth_call&to=" + encodedContractAddress +
+        "&data=" + encodedCallData +
+        "&tag=latest&apikey=" + encodedApiKey;
+
+    std::string response;
+    curl_easy_setopt(curl.get(), CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, curlWriteCallback);
+    curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &response);
+    curl_easy_setopt(curl.get(), CURLOPT_FOLLOWLOCATION, 1L);
+    curl_easy_setopt(curl.get(), CURLOPT_TIMEOUT, 10L);
+
+    const CURLcode res = curl_easy_perform(curl.get());
+
+    if (res != CURLE_OK) {
+        throw std::runtime_error(
+            std::string("fetchEthCall: HTTP request failed: ") +
+            curl_easy_strerror(res));
+    }
+
+    LOG_DEBUG("fetchEthCall response=" + response);
+    return parseEthCallResponse(response);
+}
+
+std::string Node::parseEthCallResponse(const std::string &response) {
+    const std::string resultKey = "\"result\":\"";
+    const auto keyPos = response.find(resultKey);
+    if (keyPos == std::string::npos) {
+        throw std::runtime_error(
+            "parseEthCallResponse: missing \"result\" field in response: " + response);
+    }
+
+    const auto valStart = keyPos + resultKey.size();
+    const auto valEnd   = response.find('"', valStart);
+    if (valEnd == std::string::npos) {
+        throw std::runtime_error(
+            "parseEthCallResponse: malformed response (unterminated result): " + response);
+    }
+
+    const std::string callResult = response.substr(valStart, valEnd - valStart);
+    if (callResult.empty()) {
+        throw std::runtime_error(
+            "parseEthCallResponse: empty result value in response: " + response);
+    }
+
+    return callResult;
+}
