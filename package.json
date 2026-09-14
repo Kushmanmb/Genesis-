@@ -1,0 +1,21 @@
+{
+  "name": "genesis-wasm",
+  "version": "0.1.0",
+  "private": true,
+  "description": "WebAssembly bindings for PDF text extraction and verification",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kushmanmb/Genesis-.git"
+  },
+  "scripts": {
+    "build": "cargo build --release",
+    "build:wasm": "cargo build --release --target wasm32-unknown-unknown",
+    "test": "cargo test"
+  },
+  "keywords": [
+    "wasm",
+    "pdf",
+    "rust"
+  ],
+  "license": "UNLICENSED"
+}
