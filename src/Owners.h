@@ -53,7 +53,7 @@ inline std::vector<std::string> ownerAddresses() {
 }
 
 // Social profile associated with the owner of this blockchain.
-inline constexpr std::string_view SOCIAL_PROFILE = "https://github.com/YOUR_PROFILE";
+inline constexpr std::string_view SOCIAL_PROFILE = "https://github.com/Kushmanmb";
 
 // Facebook profile associated with the owner of this blockchain.
 inline constexpr std::string_view FACEBOOK_PROFILE = "https://www.facebook.com/YOUR_PROFILE";
