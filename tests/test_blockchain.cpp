@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <cstdlib>
 #include <limits>
 #include <type_traits>
 #include <sstream>
@@ -851,6 +852,40 @@ TEST(NodeTest, ParseTokenSupplyResponseKnownContract) {
 TEST(OwnersTest, EtherscanApiKeyIsSet) {
     EXPECT_EQ(std::string(ETHERSCAN_API_KEY_PLACEHOLDER), "YOUR_ETHERSCAN_API_KEY");
     EXPECT_FALSE(ETHERSCAN_API_KEY.empty());
+}
+
+TEST(OwnersTest, ResolveOwnerAddressesDefaultsToYaketh) {
+    const char *original = std::getenv("OWNER_ADDRESSES");
+    const std::string originalValue = original ? original : "";
+
+    unsetenv("OWNER_ADDRESSES");
+    const auto owners = resolveOwnerAddresses();
+
+    if (original) {
+        setenv("OWNER_ADDRESSES", originalValue.c_str(), 1);
+    }
+
+    ASSERT_EQ(owners.size(), 1u);
+    EXPECT_EQ(owners[0], "Yaketh.eth");
+}
+
+TEST(OwnersTest, ResolveOwnerAddressesUsesEnvironmentOverride) {
+    const char *original = std::getenv("OWNER_ADDRESSES");
+    const std::string originalValue = original ? original : "";
+
+    setenv("OWNER_ADDRESSES", "0xabc, Yaketh.eth , 0xdef", 1);
+    const auto owners = resolveOwnerAddresses();
+
+    if (original) {
+        setenv("OWNER_ADDRESSES", originalValue.c_str(), 1);
+    } else {
+        unsetenv("OWNER_ADDRESSES");
+    }
+
+    ASSERT_EQ(owners.size(), 3u);
+    EXPECT_EQ(owners[0], "0xabc");
+    EXPECT_EQ(owners[1], "Yaketh.eth");
+    EXPECT_EQ(owners[2], "0xdef");
 }
 
 TEST(OwnersTest, ProfileAndIdentityPlaceholdersAreSet) {

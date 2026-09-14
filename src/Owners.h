@@ -1,14 +1,49 @@
 #pragma once
 
 #include <algorithm>
-#include <array>
 #include <cstdlib>
+#include <sstream>
 #include <string>
-#include <string_view>
+#include <vector>
+
+inline std::string trimOwnerAddress(std::string value) {
+    const std::string whitespace = " \t\n\r";
+    const auto start = value.find_first_not_of(whitespace);
+    if (start == std::string::npos) {
+        return "";
+    }
+
+    const auto end = value.find_last_not_of(whitespace);
+    return value.substr(start, end - start + 1);
+}
+
+inline std::vector<std::string> resolveOwnerAddresses() {
+    if (const char *env = std::getenv("OWNER_ADDRESSES")) {
+        if (*env != '\0') {
+            std::vector<std::string> owners;
+            std::stringstream stream(env);
+            std::string value;
+            while (std::getline(stream, value, ',')) {
+                value = trimOwnerAddress(value);
+                if (!value.empty()) {
+                    owners.push_back(value);
+                }
+            }
+
+            if (!owners.empty()) {
+                return owners;
+            }
+        }
+    }
+
+    return {"Yaketh.eth"};
+}
 
 // Owner address strings that hold owner-level permissions on this blockchain.
 // Values are matched exactly and may be hexadecimal wallet addresses or ENS names.
-inline constexpr std::array<std::string_view, 1> OWNER_ADDRESSES = {"Yaketh.eth"};
+// The OWNER_ADDRESSES environment variable may override the default with a
+// comma-separated list at runtime.
+inline const std::vector<std::string> OWNER_ADDRESSES = resolveOwnerAddresses();
 
 // Social profile associated with the owner of this blockchain.
 inline constexpr std::string_view SOCIAL_PROFILE = "https://github.com/YOUR_PROFILE";
