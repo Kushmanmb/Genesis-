@@ -6,7 +6,8 @@
 #include <string>
 #include <string_view>
 
-// Owner identifiers that hold owner-level permissions on this blockchain.
+// Owner address strings that hold owner-level permissions on this blockchain.
+// Values are matched exactly and may be hexadecimal wallet addresses or ENS names.
 inline constexpr std::array<std::string_view, 1> OWNER_ADDRESSES = {"Yaketh.eth"};
 
 // Social profile associated with the owner of this blockchain.
@@ -38,7 +39,7 @@ inline std::string resolveEtherscanApiKey() {
 
 inline const std::string ETHERSCAN_API_KEY = resolveEtherscanApiKey();
 
-// Returns true when `address` exactly matches one of the configured owner identifiers.
+// Returns true when `address` exactly matches one of the configured owner address strings.
 inline bool isOwner(const std::string &address) {
     return std::find(OWNER_ADDRESSES.begin(), OWNER_ADDRESSES.end(), address)
            != OWNER_ADDRESSES.end();
